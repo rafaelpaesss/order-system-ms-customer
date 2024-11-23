@@ -1,0 +1,34 @@
+# GET
+# Busca Cliente
+###
+
+GET http://localhost:3000/customers
+Content-Type: application/json
+
+# POST
+# Criar usuarios ADM
+###
+
+POST http://localhost:3000/customers
+Content-Type: application/json
+
+{
+  "name": "Lanchonete Fiap",
+  "email": "lanchoneteFiap@test.com.br",
+  "cpf": null,
+  "isAdmin": true
+}
+
+# POST
+# Criar Cliente 
+###
+
+POST http://localhost:3000/customers
+Content-Type: application/json
+
+{
+  "name": "Felipe Teste",
+  "email": "client@test.com.br",
+  "cpf": "429.012.493-64",
+  "isAdmin": false
+}
