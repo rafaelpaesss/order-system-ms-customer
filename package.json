@@ -14,9 +14,9 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest -i",
-    "test:e2e": "jest -i payment.e2e.spec.ts",
-    "test:unit": "jest -i payment.unit.spec.ts",
-    "test:integration": "jest -i payment.integration.spec.ts",
+    "test:e2e": "jest --verbose -i /*.e2e.spec.ts",
+    "test:unit": "jest --verbose -i /*.unit.spec.ts",
+    "test:integration": "jest -i /*.integration.spec.ts",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
@@ -38,6 +38,7 @@
     "start:migrate:prod": "npx prisma generate && yarn start:prod"
   },
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.693.0",
     "@nestjs/axios": "^3.1.0",
     "@nestjs/common": "^10.4.5",
     "@nestjs/config": "^3.3.0",
@@ -45,25 +46,21 @@
     "@nestjs/event-emitter": "^2.1.1",
     "@nestjs/platform-express": "^10.4.5",
     "@nestjs/swagger": "^7.4.2",
-    "amazon-cognito-identity-js": "^6.3.12",
-    "amqp-connection-manager": "^4.1.14",
-    "amqplib": "^0.10.4",
+    "@prisma/client": "^5.22.0",
     "axios": "^1.7.7",
-    "bcrypt": "^5.1.1",
     "class-validator": "^0.14.1",
     "date-fns": "^4.1.0",
     "mysql2": "^3.11.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "sqs-consumer": "^11.2.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.5",
     "@nestjs/schematics": "^10.2.2",
     "@nestjs/terminus": "^10.2.3",
     "@nestjs/testing": "^10.4.5",
-    "@prisma/client": "^5.21.1",
     "@testcontainers/mysql": "^10.13.2",
-    "@types/amqplib": "^0.10.5",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.13",
     "@types/mysql": "^2.15.26",
@@ -90,19 +87,10 @@
     "node": ">= 18"
   },
   "jest": {
-    "testRegex": ".*\\.ts$",
-    "roots": [
-      "<rootDir>/src",
-      "<rootDir>/test"
-    ],
+    "testRegex": ".spec.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "coverageDirectory": "../coverage",
-    "coverageReporters": [
-      "lcov",
-      "text"
-    ],
     "moduleNameMapper": {
       "src/(.*)": "<rootDir>/src/$1"
     },
@@ -126,8 +114,13 @@
         "lines": 30
       }
     },
+    "pkg": {
+      "assets": [
+        "node_modules/.prisma/client/*.node"
+      ]
+    },
     "detectOpenHandles": true,
     "testEnvironment": "node",
-    "testTimeout": 90000
+    "testTimeout": 2000000
   }
 }
