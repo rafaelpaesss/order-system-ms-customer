@@ -114,11 +114,6 @@
         "lines": 30
       }
     },
-    "pkg": {
-      "assets": [
-        "node_modules/.prisma/client/*.node"
-      ]
-    },
     "detectOpenHandles": true,
     "testEnvironment": "node",
     "testTimeout": 2000000
