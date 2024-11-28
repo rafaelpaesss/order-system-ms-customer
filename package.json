@@ -87,6 +87,9 @@
     "node": ">= 18"
   },
   "jest": {
+    "collectCoverage": true,
+    "coverageReporters": ["lcov", "text-summary"],
+    "coverageDirectory": "./coverage",
     "testRegex": ".spec.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
