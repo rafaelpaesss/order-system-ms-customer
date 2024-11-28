@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { AwsCognitoService } from 'src/Infrastructure/Apis/cognito.service'; // Presumindo que esteja usando Cognito
 import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { Customers } from '../Interfaces/customer';
 import { CustomersRepository } from '../Repositories/customersRepository';
