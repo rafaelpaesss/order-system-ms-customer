@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { CustomerRepository } from '@Domain/Repositories/customersRepository';
-import { Customer } from '@Domain/Entities/customer.entity';
 import { CreateCustomerDto } from '@Application/dto/create-customer.dto';
 import * as bcrypt from 'bcryptjs';  // Biblioteca para hashing de senhas
 import { IsNotEmpty, IsString, IsCPF } from 'class-validator'; // Para validação de dados
