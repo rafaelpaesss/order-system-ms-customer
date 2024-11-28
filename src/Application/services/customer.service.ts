@@ -1,9 +1,9 @@
 // src/Application/services/customer.service.ts
 
 import { Injectable } from '@nestjs/common';  // Supondo que está usando NestJS, ajuste conforme necessário
-import { CustomerRepository } from '../../Domain/customersRepository';
-import { Customer } from '../../Domain/entities/customer.entity';  // Supondo que você tenha uma entidade Customer
-import { DynamoDBService } from '../../Infrastructure/dynamodb.service';  // Serviço que lida com DynamoDB
+import { CustomerRepository } from '@Domain/customersRepository';
+import { Customer } from '@Domain/entities/customer.entity';
+import { DynamoDBService } from '@Infrastructure/dynamodb.service';
 
 @Injectable()
 export class CustomerService {
