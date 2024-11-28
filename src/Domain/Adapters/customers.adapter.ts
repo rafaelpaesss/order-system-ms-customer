@@ -1,10 +1,8 @@
-// src/Infrastructure/dynamodb.service.ts
-
-import { Injectable } from '@nestjs/common';  // Supondo uso de NestJS
-import { DynamoDB } from 'aws-sdk';  // SDK do DynamoDB
+import { Injectable } from '@nestjs/common'; // Supondo uso de NestJS
+import { DynamoDB } from 'aws-sdk'; // SDK do DynamoDB
 import { CustomerRepository } from '@Domain/Repositories/customersRepository';
-import { DynamoDBService } from '@Infrastructure/dynamodb.service';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Customer } from '@Domain/Entities/customer.entity'; // Certifique-se de importar o tipo Customer
 
 @Injectable()
 export class DynamoDBService {
@@ -28,10 +26,12 @@ export class DynamoDBService {
       if (!result.Item) {
         return null;  // Se não encontrar, retorna null
       }
-      return result.Item as Customer;  // Retorna o cliente encontrado
+      // Retorna o cliente encontrado (garantindo que o tipo seja Customer)
+      return result.Item as Customer;  
     } catch (err: any) {
-      //console.error('Error getting customer from DynamoDB:', error);
-      throw new NotFoundException(err?.message ?? 'Error getting customer from DynamoDB:'');
+      throw new InternalServerErrorException(
+        err?.message ?? 'Error getting customer from DynamoDB.'
+      );
     }
   }
 
@@ -46,8 +46,9 @@ export class DynamoDBService {
       await this.dynamoDbClient.put(params).promise();
       return customer;  // Retorna o cliente que foi salvo
     } catch (err: any) {
-      //console.error('Error saving customer to DynamoDB:', error);
-      throw new NotFoundException(err?.message ?? 'Error getting customer from DynamoDB:'');
+      throw new InternalServerErrorException(
+        err?.message ?? 'Error saving customer to DynamoDB.'
+      );
     }
   }
 }
