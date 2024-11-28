@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';  // Supondo uso de NestJS
 import { DynamoDB } from 'aws-sdk';  // SDK do DynamoDB
-import { CustomerRepository } from '@Domain/customersRepository';
+import { CustomerRepository } from '@Domain/Repositories/customersRepository';
 import { DynamoDBService } from '@Infrastructure/dynamodb.service';
 import { NotFoundException } from '@nestjs/common';
 
