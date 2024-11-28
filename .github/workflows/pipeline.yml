@@ -21,9 +21,10 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies
+      - name: Running dependencies
         run: |
-          yarn
+          yarn add @prisma/adapter-dynamodb
+          npx prisma generate
 
       - name: Set up Docker
         run: |
