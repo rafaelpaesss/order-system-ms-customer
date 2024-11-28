@@ -1,5 +1,5 @@
-import { CustomerRepository } from '@Domain/Repositories/customersRepository';
 import { Customer } from '@Domain/Entities/customer.entity';
+import { CustomerRepository } from '@Domain/Repositories/customersRepository';
 
 export class CustomerService {
   private customerRepository: CustomerRepository;
