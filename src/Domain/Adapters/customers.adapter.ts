@@ -1,87 +1,51 @@
-import { Injectable } from '@nestjs/common';
-import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { Customers } from '../Interfaces/customer';
-import { CustomersRepository } from '../Repositories/customersRepository';
+// src/Infrastructure/dynamodb.service.ts
+
+import { Injectable } from '@nestjs/common';  // Supondo uso de NestJS
+import { DynamoDB } from 'aws-sdk';  // SDK do DynamoDB
+import { Customer } from '../Domain/entities/customer.entity';  // Supondo que você tenha uma entidade Customer
 
 @Injectable()
-export class CustomersAdapter implements CustomersRepository {
-  private readonly client: DynamoDBClient;
+export class DynamoDBService {
+  private dynamoDbClient: DynamoDB.DocumentClient;
 
   constructor() {
-    this.client = new DynamoDBClient({ region: 'us-east-1' }); // Região do DynamoDB
+    this.dynamoDbClient = new DynamoDB.DocumentClient();
   }
 
-  // Método para obter o cliente pelo CPF, agora validando a senha
-  async getCustomerByCpf(cpf: string, password: string): Promise<Customers | null> {
+  // Método para buscar um cliente por CPF
+  async getCustomerByCpf(cpf: string): Promise<Customer | null> {
+    const params: DynamoDB.DocumentClient.GetItemInput = {
+      TableName: 'CustomersTable',  // Nome da tabela no DynamoDB
+      Key: {
+        cpf: cpf,  // A chave primária da tabela é o CPF
+      },
+    };
+
     try {
-      // Remover a máscara do CPF, se necessário
-      const newCpf = cpf; // Se precisar remover a máscara, implemente a lógica aqui
-
-      // Buscando o cliente no DynamoDB
-      const params = {
-        TableName: 'Customers', // Nome da tabela no DynamoDB
-        Key: {
-          cpf: { S: newCpf }, // Usando o CPF como chave de pesquisa
-        },
-      };
-
-      const { Item } = await this.client.send(new GetItemCommand(params));
-
-      // Verificando se o cliente foi encontrado
-      if (!Item) {
-        throw new Error('Cliente não encontrado');
+      const result = await this.dynamoDbClient.get(params).promise();
+      if (!result.Item) {
+        return null;  // Se não encontrar, retorna null
       }
-
-      // Convertendo os dados do DynamoDB para o formato de Customers
-      const customer: Customers = {
-        id: parseInt(Item.id.S), // Convertendo o ID de string para número
-        name: Item.name.S,
-        email: Item.email.S,
-        cpf: Item.cpf.S,
-        isAdmin: Item.isAdmin.BOOL,
-        password: Item.password.S,
-        createdAt: new Date(Item.createdAt.S),
-        updatedAt: new Date(Item.updatedAt.S),
-      };
-
-      // Verificando a senha fornecida
-      if (customer.password !== password) {
-        throw new Error('Senha inválida');
-      }
-
-      return customer;
+      return result.Item as Customer;  // Retorna o cliente encontrado
     } catch (error) {
-      const message =
-        error?.message || error?.meta?.target || error?.meta?.details;
-      throw new Error(message);
+      console.error('Error getting customer from DynamoDB:', error);
+      throw error;
     }
   }
 
-  // Método para salvar o cliente no DynamoDB
-  async saveCustomer(customer: Customers): Promise<Customers> {
+  // Método para salvar um cliente no DynamoDB
+  async saveCustomer(customer: Customer): Promise<Customer> {
+    const params: DynamoDB.DocumentClient.PutItemInput = {
+      TableName: 'CustomersTable',  // Nome da tabela
+      Item: customer,  // Cliente a ser salvo
+    };
+
     try {
-      // Criando um novo cliente no DynamoDB
-      const params = {
-        TableName: 'Customers', // Nome da tabela no DynamoDB
-        Item: {
-          id: { S: customer.id.toString() }, // ID como string
-          name: { S: customer.name },
-          email: { S: customer.email },
-          cpf: { S: customer.cpf }, // CPF sem máscara
-          isAdmin: { BOOL: customer.isAdmin },
-          password: { S: customer.password },
-          createdAt: { S: customer.createdAt.toISOString() }, // Convertendo a data para string
-          updatedAt: { S: customer.updatedAt.toISOString() }, // Convertendo a data para string
-        },
-      };
-
-      await this.client.send(new PutItemCommand(params));
-
-      return customer;
+      await this.dynamoDbClient.put(params).promise();
+      return customer;  // Retorna o cliente que foi salvo
     } catch (error) {
-      const message =
-        error?.message || error?.meta?.target || error?.meta?.details;
-      throw new Error(message);
+      console.error('Error saving customer to DynamoDB:', error);
+      throw error;
     }
   }
 }
