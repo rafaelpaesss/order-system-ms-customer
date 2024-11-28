@@ -1,17 +1,11 @@
+// src/Presentation/Health/health.module.ts
+
 import { Module } from '@nestjs/common';
-import { TerminusModule } from '@nestjs/terminus';
-import { PrismaService } from '../../Infrastructure/Apis/prisma.service';
-import { PrismaHealthIndicator } from './PrismaHealthIndicator.service';
-import { HealthController } from './health.controller';
+import { HealthController } from './health.controller';  // Importando o HealthController
 
 @Module({
-  imports: [
-    TerminusModule,
-    TerminusModule.forRoot({
-      errorLogStyle: 'pretty',
-    }),
-  ],
-  providers: [PrismaHealthIndicator, PrismaService],
-  controllers: [HealthController],
+  imports: [],  // Não há dependências externas para este módulo
+  controllers: [HealthController],  // Registrando o controlador de saúde
+  providers: [],  // Não há serviços específicos para este módulo, mas pode ser adicionado no futuro
 })
 export class HealthModule {}
