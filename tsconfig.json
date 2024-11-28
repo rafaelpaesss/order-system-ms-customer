@@ -8,6 +8,19 @@
     },
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "emitDecoratorMetadata": true,
+    "target": "ESNext",  // Garantir que a versão alvo do JS seja adequada para o uso moderno
+    "moduleResolution": "node",  // Resolver módulos conforme Node.js
+    "strict": true,  // Habilitar verificações rigorosas no código TypeScript
+    "skipLibCheck": true,  // Ignorar a verificação de tipos de arquivos de bibliotecas
+    "resolveJsonModule": true,  // Permitir a importação de arquivos JSON
+    "noEmitOnError": true,  // Não gerar código se houver erros no TypeScript
+    "outDir": "./dist"  // Definir o diretório de saída para os arquivos compilados
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
