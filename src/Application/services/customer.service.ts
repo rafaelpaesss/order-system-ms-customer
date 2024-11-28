@@ -9,6 +9,7 @@ export class CustomerService {
 
   // Método para obter o cliente pelo CPF (agora com senha)
   async getByCpf(cpf: string, password: string): Promise<Customers | null> {
+    // Aqui, a lógica de recuperação do cliente seria implementada no repositório
     return this.customersRepository.getCustomerByCpf(cpf, password);
   }
 
@@ -16,7 +17,7 @@ export class CustomerService {
   async create(dto: CustomersDto): Promise<Customers> {
     // Mapeia o DTO para a estrutura do tipo Customers
     const customerData: Customers = {
-      id: 0, // O Prisma gerencia o ID automaticamente
+      id: 0, // A ID pode ser gerada automaticamente ou atribuída pelo DynamoDB
       name: dto.name,
       email: dto.email,
       cpf: dto.cpf, 
@@ -26,7 +27,7 @@ export class CustomerService {
       updatedAt: new Date(),
     };
 
+    // Salva o cliente no repositório, interagindo com o DynamoDB
     return this.customersRepository.saveCustomer(customerData);
   }
-
 }
