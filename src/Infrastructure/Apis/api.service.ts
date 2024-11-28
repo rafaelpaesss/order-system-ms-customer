@@ -1,32 +1,35 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { AxiosRequestConfig } from 'axios';
-import { firstValueFrom } from 'rxjs';
+import { CustomerService } from '../../Application/services/customer.service';  // Serviço de lógica de negócios
+import { Customer } from '../../Domain/entities/customer.entity';  // Entidade Customer
+import { ApiResponse } from './api.response';  // Definindo uma resposta padrão (opcional)
 
 @Injectable()
-export abstract class BaseHttpRequestService {
-  constructor(
-    protected readonly configService: ConfigService,
-    protected httpService: HttpService,
-  ) {}
+export class ApiService {
+  constructor(private readonly customerService: CustomerService) {}
 
-  private readonly USERID = this.configService.get<string>('USERID');
-  private readonly POSID = this.configService.get<string>('POSID');
-  private readonly TOKEN = this.configService.get<string>('TOKEN_MERCADO_PAGO');
+  // Método para validar um usuário via CPF e senha
+  async validateUser(cpf: string, password: string): Promise<ApiResponse> {
+    try {
+      const isValid = await this.customerService.validateUser(cpf, password);
+      if (isValid) {
+        return new ApiResponse('User validated successfully', 200);
+      } else {
+        return new ApiResponse('Invalid CPF or password', 400);
+      }
+    } catch (error) {
+      console.error('Error validating user:', error);
+      return new ApiResponse('Error validating user', 500);
+    }
+  }
 
-  async request(options?: AxiosRequestConfig) {
-    const headers = {
-      ['Content-Type']: 'application/json',
-      ['Authorization']: `Bearer ${this.TOKEN}`,
-    };
-
-    return await firstValueFrom(
-      this.httpService.request({
-        ...options,
-        baseURL: `https://api.mercadopago.com/instore/orders/qr/seller/collectors/${this.USERID}/pos/${this.POSID}/qrs`,
-        headers,
-      }),
-    );
+  // Método para cadastrar um novo usuário
+  async registerCustomer(customer: Customer): Promise<ApiResponse> {
+    try {
+      const newCustomer = await this.customerService.registerCustomer(customer);
+      return new ApiResponse('Customer registered successfully', 201, newCustomer);
+    } catch (error) {
+      console.error('Error registering customer:', error);
+      return new ApiResponse('Error registering customer', 500);
+    }
   }
 }
