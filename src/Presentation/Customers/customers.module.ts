@@ -1,21 +1,20 @@
-import { Module } from '@nestjs/common';
+// src/Presentation/Customers/customers.module.ts
 
-import { AwsCognitoService } from 'src/Infrastructure/Apis/cognito.service';
-import { CustomerService } from '../../Application/services/customer.service';
-import { CustomersAdapter } from '../../Domain/Adapters/customers.adapter';
-import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
-import { PrismaService } from '../../Infrastructure/Apis/prisma.service';
-import { CustomersController } from './customers.controller';
+import { Module } from '@nestjs/common';
+import { CustomerController } from './customer.controller';  // Controller
+import { CustomerService } from '../../Application/services/customer.service';  // Serviço de lógica de negócios
+import { CustomerRepository } from '../../Domain/customersRepository';  // Repositório
+import { DynamoDBService } from '../../Infrastructure/dynamodb.service';  // Serviço de integração com DynamoDB
+import { ApiService } from '../../Infrastructure/Apis/api.service';  // Serviço da API
 
 @Module({
   imports: [],
-  controllers: [CustomersController],
+  controllers: [CustomerController],  // Controller para mapear as rotas
   providers: [
-    { provide: CustomersRepository, useClass: CustomersAdapter },
-    PrismaService,
-    AwsCognitoService,
-    CustomerService,
+    ApiService,  // Serviço que coordena as operações da API
+    CustomerService,  // Serviço de lógica de clientes
+    CustomerRepository,  // Repositório de dados
+    DynamoDBService,  // Serviço de integração com o DynamoDB
   ],
-  exports: [CustomerService],
 })
 export class CustomersModule {}
