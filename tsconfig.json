@@ -5,6 +5,8 @@
       "@Domain/*": ["src/Domain/*"],
       "@Infrastructure/*": ["src/Infrastructure/*"],
       "@Application/*": ["src/Application/*"]
-    }
+    },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   }
 }
