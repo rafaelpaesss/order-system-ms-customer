@@ -3,16 +3,8 @@
     "baseUrl": "./",
     "paths": {
       "@Domain/*": ["src/Domain/*"],
-      "@Application/*": ["src/Application/*"],
       "@Infrastructure/*": ["src/Infrastructure/*"],
-      "@Presentation/*": ["src/Presentation/*"]
-    },
-    "module": "commonjs",
-    "target": "ES2021",
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true
+      "@Application/*": ["src/Application/*"]
+    }
   }
 }
