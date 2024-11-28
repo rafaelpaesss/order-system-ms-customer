@@ -3,9 +3,10 @@
     "baseUrl": "./",
     "paths": {
       "@Domain/*": ["src/Domain/*"],
-      "@Infrastructure/*": ["src/Infrastructure/*"],
-      "@Application/*": ["src/Application/*"]
+      "@Application/*": ["src/Application/*"],
+      "@Infrastructure/*": ["src/Infrastructure/*"]
     },
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   }
