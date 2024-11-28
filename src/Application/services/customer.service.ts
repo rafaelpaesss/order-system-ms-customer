@@ -1,33 +1,57 @@
-import { Injectable } from '@nestjs/common';
-import { CustomersRepository } from 'src/Domain/Repositories/customersRepository'; // Certifique-se de que o caminho esteja correto
-import { Customers } from 'src/Domain/Interfaces/customer';
-import { CustomersDto } from 'src/Presentation/Customers/dtos/customers.dto'; // Importe o DTO
+// src/Application/services/customer.service.ts
+
+import { Injectable } from '@nestjs/common';  // Supondo que está usando NestJS, ajuste conforme necessário
+import { CustomerRepository } from '../../Domain/customersRepository';
+import { Customer } from '../../Domain/entities/customer.entity';  // Supondo que você tenha uma entidade Customer
+import { DynamoDBService } from '../../Infrastructure/dynamodb.service';  // Serviço que lida com DynamoDB
 
 @Injectable()
 export class CustomerService {
-  constructor(private readonly customersRepository: CustomersRepository) {}
+  private customerRepository: CustomerRepository;
 
-  // Método para obter o cliente pelo CPF (agora com senha)
-  async getByCpf(cpf: string, password: string): Promise<Customers | null> {
-    // Aqui, a lógica de recuperação do cliente seria implementada no repositório
-    return this.customersRepository.getCustomerByCpf(cpf, password);
+  constructor(
+    private dynamoDBService: DynamoDBService,  // Dependência do serviço DynamoDB
+  ) {
+    this.customerRepository = new CustomerRepository(this.dynamoDBService);
   }
 
-  // Método para criar um cliente
-  async create(dto: CustomersDto): Promise<Customers> {
-    // Mapeia o DTO para a estrutura do tipo Customers
-    const customerData: Customers = {
-      id: 0, // A ID pode ser gerada automaticamente ou atribuída pelo DynamoDB
-      name: dto.name,
-      email: dto.email,
-      cpf: dto.cpf, 
-      isAdmin: dto.isAdmin || false, // Pode ser false por padrão se não for fornecido
-      password: dto.password, // Não esqueça de incluir a senha
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+  // Método para validar se o usuário existe no DynamoDB
+  async validateUser(cpf: string, password: string): Promise<boolean> {
+    try {
+      const customer = await this.customerRepository.findByCpf(cpf);
 
-    // Salva o cliente no repositório, interagindo com o DynamoDB
-    return this.customersRepository.saveCustomer(customerData);
+      if (!customer) {
+        throw new Error('Customer not found');
+      }
+
+      // Aqui você pode adicionar a lógica para verificar a senha
+      if (customer.password !== password) {
+        throw new Error('Invalid password');
+      }
+
+      return true;  // Usuário validado com sucesso
+    } catch (error) {
+      console.error('Error validating user:', error);
+      throw error;
+    }
+  }
+
+  // Método para cadastrar um novo usuário no DynamoDB
+  async registerCustomer(customer: Customer): Promise<Customer> {
+    try {
+      // Primeiro, você pode verificar se o usuário já existe
+      const existingCustomer = await this.customerRepository.findByCpf(customer.cpf);
+      if (existingCustomer) {
+        throw new Error('Customer with this CPF already exists');
+      }
+
+      // Aqui você pode criar a lógica de validação dos dados antes de salvar no banco
+      const newCustomer = await this.customerRepository.save(customer);
+
+      return newCustomer;  // Retorna o cliente cadastrado
+    } catch (error) {
+      console.error('Error registering customer:', error);
+      throw error;
+    }
   }
 }
