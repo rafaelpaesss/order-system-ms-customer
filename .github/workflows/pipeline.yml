@@ -24,7 +24,6 @@ jobs:
       - name: Running dependencies
         run: |
           yarn add aws-sdk
-          npx prisma generate
           yarn add @aws-sdk/client-dynamodb
 
       - name: Set up Docker
