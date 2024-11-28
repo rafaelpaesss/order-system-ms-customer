@@ -29,9 +29,9 @@ export class DynamoDBService {
         return null;  // Se não encontrar, retorna null
       }
       return result.Item as Customer;  // Retorna o cliente encontrado
-    } catch (error) {
-      console.error('Error getting customer from DynamoDB:', error);
-      throw error;
+    } catch (err: any) {
+      //console.error('Error getting customer from DynamoDB:', error);
+      throw new NotFoundException(err?.message ?? 'Error getting customer from DynamoDB:'');
     }
   }
 
@@ -45,9 +45,9 @@ export class DynamoDBService {
     try {
       await this.dynamoDbClient.put(params).promise();
       return customer;  // Retorna o cliente que foi salvo
-    } catch (error) {
-      console.error('Error saving customer to DynamoDB:', error);
-      throw error;
+    } catch (err: any) {
+      //console.error('Error saving customer to DynamoDB:', error);
+      throw new NotFoundException(err?.message ?? 'Error getting customer from DynamoDB:'');
     }
   }
 }
