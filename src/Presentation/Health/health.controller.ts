@@ -1,16 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
-import { HealthCheck } from '@nestjs/terminus';
-import { PrismaHealthIndicator } from './PrismaHealthIndicator.service';
-import { ApiTags } from '@nestjs/swagger';
+// src/Presentation/Health/health.controller.ts
 
-@ApiTags('health')
+import { Controller, Get } from '@nestjs/common';
+
 @Controller('health')
 export class HealthController {
-  constructor(private health: PrismaHealthIndicator) {}
-
+  // Rota GET para o endpoint /health
   @Get()
-  @HealthCheck()
-  check() {
-    return this.health.isHealthy('check');
+  checkHealth(): string {
+    // Aqui você pode adicionar verificações mais complexas, como conectividade com bancos de dados, etc.
+    return 'OK';  // Retorna um status simples de "OK"
   }
 }
