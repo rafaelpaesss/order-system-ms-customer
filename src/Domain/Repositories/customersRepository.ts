@@ -1,7 +1,9 @@
 // src/Domain/customersRepository.ts
 
-import { DynamoDBService } from '../Infrastructure/dynamodb.service';
-import { Customer } from './entities/customer.entity';
+import { CustomerRepository } from '@Domain/customersRepository';
+import { Customer } from '@Domain/entities/customer.entity';
+import { DynamoDBService } from '@Infrastructure/dynamodb.service';
+
 
 export class CustomerRepository {
   private dynamoDBService: DynamoDBService;
