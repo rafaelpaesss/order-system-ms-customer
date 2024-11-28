@@ -1,57 +1,43 @@
-// src/Application/services/customer.service.ts
+import { CustomerRepository } from '@Domain/Repositories/customersRepository';
+import { Customer } from '@Domain/Entities/customer.entity';
 
-import { Injectable } from '@nestjs/common';  // Supondo que está usando NestJS, ajuste conforme necessário
-import { CustomerRepository } from '@Domain/customersRepository';
-import { Customer } from '@Domain/entities/customer.entity';
-import { DynamoDBService } from '@Infrastructure/dynamodb.service';
-
-@Injectable()
 export class CustomerService {
   private customerRepository: CustomerRepository;
 
-  constructor(
-    private dynamoDBService: DynamoDBService,  // Dependência do serviço DynamoDB
-  ) {
-    this.customerRepository = new CustomerRepository(this.dynamoDBService);
+  constructor(customerRepository: CustomerRepository) {
+    this.customerRepository = customerRepository;
   }
 
-  // Método para validar se o usuário existe no DynamoDB
-  async validateUser(cpf: string, password: string): Promise<boolean> {
-    try {
-      const customer = await this.customerRepository.findByCpf(cpf);
-
-      if (!customer) {
-        throw new Error('Customer not found');
-      }
-
-      // Aqui você pode adicionar a lógica para verificar a senha
-      if (customer.password !== password) {
-        throw new Error('Invalid password');
-      }
-
-      return true;  // Usuário validado com sucesso
-    } catch (error) {
-      console.error('Error validating user:', error);
-      throw error;
+  /**
+   * Busca um cliente pelo CPF e verifica a senha.
+   * @param cpf - CPF do cliente.
+   * @param password - Senha do cliente.
+   * @returns O cliente, se encontrado, ou null.
+   */
+  async getByCpf(cpf: string, password: string): Promise<Customer | null> {
+    // Busca o cliente pelo CPF
+    const customer = await this.customerRepository.findByCpf(cpf);
+    if (!customer) {
+      return null; // Retorna null se o cliente não for encontrado
     }
+
+    // Verifica se a senha corresponde
+    const isPasswordValid = customer.password === password; // Substitua por hash se necessário
+    if (!isPasswordValid) {
+      return null; // Retorna null se a senha estiver incorreta
+    }
+
+    return customer; // Retorna o cliente se tudo estiver correto
   }
 
-  // Método para cadastrar um novo usuário no DynamoDB
-  async registerCustomer(customer: Customer): Promise<Customer> {
-    try {
-      // Primeiro, você pode verificar se o usuário já existe
-      const existingCustomer = await this.customerRepository.findByCpf(customer.cpf);
-      if (existingCustomer) {
-        throw new Error('Customer with this CPF already exists');
-      }
-
-      // Aqui você pode criar a lógica de validação dos dados antes de salvar no banco
-      const newCustomer = await this.customerRepository.save(customer);
-
-      return newCustomer;  // Retorna o cliente cadastrado
-    } catch (error) {
-      console.error('Error registering customer:', error);
-      throw error;
-    }
+  /**
+   * Cria um novo cliente.
+   * @param customerData - Dados do cliente.
+   * @returns O cliente criado.
+   */
+  async create(customerData: Partial<Customer>): Promise<Customer> {
+    // Criação de um novo cliente no repositório
+    const newCustomer = await this.customerRepository.create(customerData);
+    return newCustomer;
   }
 }
