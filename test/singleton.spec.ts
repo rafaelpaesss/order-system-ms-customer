@@ -1,15 +1,21 @@
-import { PrismaClient } from '@prisma/client';
-import { DeepMockProxy, mockDeep, mockReset } from 'jest-mock-extended';
+import { DeepMockProxy, mockDeep, mockReset } from 'jest-mock-extended'; // Mocks
 
-// Mock do Prisma
-jest.mock('./client', () => ({
+// Supondo que você tenha um repositório que interage com o DynamoDB
+import { CustomersRepository } from 'src/Domain/Repositories/customersRepository'; // Ajuste o caminho conforme necessário
+
+// Criando o mock do repositório que usa DynamoDB
+const customersRepositoryMock = mockDeep<CustomersRepository>();
+
+// Mock do repositório
+jest.mock('src/Domain/Repositories/customersRepository', () => ({
   __esModule: true,
-  default: mockDeep<PrismaClient>(), // Criação do mock do PrismaClient
+  CustomersRepository: customersRepositoryMock, // Mock do CustomersRepository
 }));
 
-// Recupera a instância do prisma mockado
-export const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
+// Exporta o mock para os testes
+export const customersRepositoryMockInstance = customersRepositoryMock as unknown as DeepMockProxy<CustomersRepository>;
 
+// Reseta o mock antes de cada teste
 beforeEach(() => {
-  mockReset(prismaMock); // Reseta o prismaMock antes de cada teste
+  mockReset(customersRepositoryMockInstance); // Reseta o mock antes de cada teste
 });
