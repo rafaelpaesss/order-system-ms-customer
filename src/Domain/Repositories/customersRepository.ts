@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
 import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { Customers } from 'src/Domain/Interfaces/customer';
+import { CustomersRepository } from '../Repositories/customersRepository';
+import { Customers } from '../Interfaces/customer';
 
 @Injectable()
-export class CustomersRepository {
+export class CustomersAdapter implements CustomersRepository {
   private readonly client: DynamoDBClient;
-
+  
   constructor() {
     this.client = new DynamoDBClient({ region: 'us-east-1' });
   }
