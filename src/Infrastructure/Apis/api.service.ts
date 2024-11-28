@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CustomerService } from '../../Application/services/customer.service';  // Serviço de lógica de negócios
-import { Customer } from '../../Domain/entities/customer.entity';  // Entidade Customer
+import { Customer } from '@Domain/Entities/customer.entity';
+import { CustomerRepository } from '@Domain/Repositories/customersRepository';
 import { ApiResponse } from './api.response';  // Definindo uma resposta padrão (opcional)
 
 @Injectable()
