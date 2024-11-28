@@ -1,6 +1,11 @@
-import { Customer } from '@Domain/Entities/customer.entity';
+import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { CustomerRepository } from '@Domain/Repositories/customersRepository';
+import { Customer } from '@Domain/Entities/customer.entity';
+import { CreateCustomerDto } from '@Application/dto/create-customer.dto';
+import * as bcrypt from 'bcryptjs';  // Biblioteca para hashing de senhas
+import { IsNotEmpty, IsString, IsCPF } from 'class-validator'; // Para validação de dados
 
+@Injectable()
 export class CustomerService {
   private customerRepository: CustomerRepository;
 
@@ -18,13 +23,13 @@ export class CustomerService {
     // Busca o cliente pelo CPF
     const customer = await this.customerRepository.findByCpf(cpf);
     if (!customer) {
-      return null; // Retorna null se o cliente não for encontrado
+      throw new NotFoundException(`Customer with CPF ${cpf} not found.`);
     }
 
-    // Verifica se a senha corresponde
-    const isPasswordValid = customer.password === password; // Substitua por hash se necessário
+    // Verifica se a senha corresponde (comparação com hash)
+    const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
-      return null; // Retorna null se a senha estiver incorreta
+      throw new UnauthorizedException('Invalid password.');
     }
 
     return customer; // Retorna o cliente se tudo estiver correto
@@ -35,9 +40,22 @@ export class CustomerService {
    * @param customerData - Dados do cliente.
    * @returns O cliente criado.
    */
-  async create(customerData: Partial<Customer>): Promise<Customer> {
+  async create(customerData: CreateCustomerDto): Promise<Customer> {
+    // Verificar se já existe um cliente com o mesmo CPF
+    const existingCustomer = await this.customerRepository.findByCpf(customerData.cpf);
+    if (existingCustomer) {
+      throw new ConflictException(`Customer with CPF ${customerData.cpf} already exists.`);
+    }
+
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(customerData.password, 10);  // Salt em 10 rounds
+
     // Criação de um novo cliente no repositório
-    const newCustomer = await this.customerRepository.create(customerData);
+    const newCustomer = await this.customerRepository.create({
+      ...customerData,
+      password: hashedPassword,  // Salva a senha hashada
+    });
+
     return newCustomer;
   }
 }
