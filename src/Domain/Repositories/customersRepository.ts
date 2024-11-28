@@ -1,75 +1,57 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { CustomersRepository } from '../Repositories/customersRepository';
-import { Customers } from '../Interfaces/customer';
+// src/Domain/customersRepository.ts
 
-@Injectable()
-export class CustomersAdapter implements CustomersRepository {
-  private readonly client: DynamoDBClient;
-  
-  constructor() {
-    this.client = new DynamoDBClient({ region: 'us-east-1' });
+import { DynamoDBService } from '../Infrastructure/dynamodb.service';
+import { Customer } from './entities/customer.entity';
+
+export class CustomerRepository {
+  private dynamoDBService: DynamoDBService;
+
+  constructor(dynamoDBService: DynamoDBService) {
+    this.dynamoDBService = dynamoDBService;
   }
 
-  // Método para obter o cliente pelo CPF
-  async getCustomerByCpf(cpf: string, password: string): Promise<Customers | null> {
-    const params = {
-      TableName: 'Customers', // Nome da tabela no DynamoDB
-      Key: {
-        cpf: { S: cpf }, // Usando o CPF como chave de pesquisa
-      },
-    };
-
+  // Método para buscar um cliente por CPF
+  async findByCpf(cpf: string): Promise<Customer | null> {
     try {
-      const { Item } = await this.client.send(new GetItemCommand(params));
-
-      // Verifica se o item foi encontrado
-      if (Item) {
-        // Converte o Item do DynamoDB para o formato do Customers
-        const customer: Customers = {
-          id: parseInt(Item.id.S), // Supondo que o ID seja um campo no formato string
-          name: Item.name.S,
-          email: Item.email.S,
-          cpf: Item.cpf.S,
-          isAdmin: Item.isAdmin.BOOL,
-          password: Item.password.S,
-          createdAt: new Date(Item.createdAt.S),
-          updatedAt: new Date(Item.updatedAt.S),
-        };
-
-        // Verifica a senha (se necessário)
-        if (customer.password === password) {
-          return customer;
-        }
-      }
-      return null;
+      const customer = await this.dynamoDBService.getCustomerByCpf(cpf);
+      return customer;
     } catch (error) {
-      console.error('Error getting customer by CPF:', error);
-      throw new Error('Error getting customer by CPF');
+      console.error('Error finding customer by CPF:', error);
+      throw new Error('Error finding customer');
     }
   }
 
-  // Método para salvar um cliente
-  async saveCustomer(customer: Customers): Promise<Customers> {
-    const params = {
-      TableName: 'Customers', // Nome da tabela no DynamoDB
-      Item: {
-        id: { S: customer.id.toString() },
-        name: { S: customer.name },
-        email: { S: customer.email },
-        cpf: { S: customer.cpf },
-        isAdmin: { BOOL: customer.isAdmin },
-        password: { S: customer.password },
-        createdAt: { S: customer.createdAt.toISOString() },
-        updatedAt: { S: customer.updatedAt.toISOString() },
-      },
-    };
-
+  // Método para salvar um cliente no DynamoDB
+  async save(customer: Customer): Promise<Customer> {
     try {
-      await this.client.send(new PutItemCommand(params));
-      return customer;
+      const savedCustomer = await this.dynamoDBService.saveCustomer(customer);
+      return savedCustomer;
     } catch (error) {
       console.error('Error saving customer:', error);
       throw new Error('Error saving customer');
+    }
+  }
+  
+  // Método para atualizar um cliente no DynamoDB (caso necessário)
+  async update(customer: Customer): Promise<Customer> {
+    try {
+      const existingCustomer = await this.findByCpf(customer.cpf);
+      if (!existingCustomer) {
+        throw new Error('Customer not found for update');
+      }
+
+      // Suponhamos que você só precise atualizar os campos alterados
+      const updatedCustomer = {
+        ...existingCustomer,
+        ...customer,  // Atualiza com os novos dados
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.dynamoDBService.saveCustomer(updatedCustomer);  // Reempla os dados no DynamoDB
+      return updatedCustomer;  // Retorna o cliente atualizado
+    } catch (error) {
+      console.error('Error updating customer:', error);
+      throw new Error('Error updating customer');
     }
   }
 }
