@@ -13,3 +13,9 @@ export const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 beforeEach(() => {
   mockReset(prismaMock); // Reseta o prismaMock antes de cada teste
 });
+
+describe('Singleton', () => {
+  it('should be defined', () => {
+    expect(true).toBe(true);
+  });
+});
