@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { CustomerRepository } from '@Domain/Repositories/customersRepository';
 import { CreateCustomerDto } from '@Application/dto/create-customer.dto';
-import * as bcrypt from 'bcryptjs';  // Biblioteca para hashing de senhas
-import { IsNotEmpty, IsString, IsCPF } from 'class-validator'; // Para validação de dados
+import { IsNotEmpty, IsString, IsCPF } from 'class-validator';  // Para validação de dados
 
 @Injectable()
 export class CustomerService {
@@ -25,9 +24,8 @@ export class CustomerService {
       throw new NotFoundException(`Customer with CPF ${cpf} not found.`);
     }
 
-    // Verifica se a senha corresponde (comparação com hash)
-    const isPasswordValid = await bcrypt.compare(password, customer.password);
-    if (!isPasswordValid) {
+    // Verifica se a senha corresponde diretamente (sem hash)
+    if (customer.password !== password) {
       throw new UnauthorizedException('Invalid password.');
     }
 
@@ -46,13 +44,10 @@ export class CustomerService {
       throw new ConflictException(`Customer with CPF ${customerData.cpf} already exists.`);
     }
 
-    // Hash da senha
-    const hashedPassword = await bcrypt.hash(customerData.password, 10);  // Salt em 10 rounds
-
     // Criação de um novo cliente no repositório
     const newCustomer = await this.customerRepository.create({
       ...customerData,
-      password: hashedPassword,  // Salva a senha hashada
+      password: customerData.password,  // Salva a senha sem alteração (sem hash)
     });
 
     return newCustomer;
