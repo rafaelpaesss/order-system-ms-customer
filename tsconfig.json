@@ -5,7 +5,8 @@
       "@Domain/*": ["src/Domain/*"],
       "@Application/*": ["src/Application/*"],
       "@Infrastructure/*": ["src/Infrastructure/Apis/*"],
-      "@test/*": ["src/__test__/*"]
+      "@test/*": ["src/__test__/*"],
+      "@dtos/*": ["src/Presentation/Customers/dtos/*"]
     },
     "esModuleInterop": true,
     "experimentalDecorators": true,
