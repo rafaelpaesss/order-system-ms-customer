@@ -1,55 +1,27 @@
-import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
-import { CustomerRepository } from '@Domain/Repositories/customersRepository';
-import { CreateCustomerDto } from '@Application/dto/create-customer.dto';
-import { IsNotEmpty, IsString, IsCPF } from 'class-validator';  // Para validação de dados
+// src/Application/services/customer.service.ts
+import { Injectable } from '@nestjs/common';
+import { Customer } from '@Domain/Entities/customer.entity'; // Certifique-se de que o tipo Customer está correto
+import { CustomersRepository } from '@Domain/Repositories/customersRepository'; // Repositório de clientes
 
 @Injectable()
 export class CustomerService {
-  private customerRepository: CustomerRepository;
+  constructor(
+    private readonly customersRepository: CustomersRepository, // Injeção do repositório
+  ) {}
 
-  constructor(customerRepository: CustomerRepository) {
-    this.customerRepository = customerRepository;
-  }
-
-  /**
-   * Busca um cliente pelo CPF e verifica a senha.
-   * @param cpf - CPF do cliente.
-   * @param password - Senha do cliente.
-   * @returns O cliente, se encontrado, ou null.
-   */
+  // Método para buscar o cliente pelo CPF e senha
   async getByCpf(cpf: string, password: string): Promise<Customer | null> {
-    // Busca o cliente pelo CPF
-    const customer = await this.customerRepository.findByCpf(cpf);
-    if (!customer) {
-      throw new NotFoundException(`Customer with CPF ${cpf} not found.`);
+    // Lógica para validar o cliente
+    const customer = await this.customersRepository.findByCpf(cpf);
+    if (customer && customer.password === password) { // Comparando senha
+      return customer;
     }
-
-    // Verifica se a senha corresponde diretamente (sem hash)
-    if (customer.password !== password) {
-      throw new UnauthorizedException('Invalid password.');
-    }
-
-    return customer; // Retorna o cliente se tudo estiver correto
+    return null;
   }
 
-  /**
-   * Cria um novo cliente.
-   * @param customerData - Dados do cliente.
-   * @returns O cliente criado.
-   */
+  // Método para criar um cliente
   async create(customerData: CreateCustomerDto): Promise<Customer> {
-    // Verificar se já existe um cliente com o mesmo CPF
-    const existingCustomer = await this.customerRepository.findByCpf(customerData.cpf);
-    if (existingCustomer) {
-      throw new ConflictException(`Customer with CPF ${customerData.cpf} already exists.`);
-    }
-
-    // Criação de um novo cliente no repositório
-    const newCustomer = await this.customerRepository.create({
-      ...customerData,
-      password: customerData.password,  // Salva a senha sem alteração (sem hash)
-    });
-
+    const newCustomer = await this.customersRepository.create(customerData);
     return newCustomer;
   }
 }
