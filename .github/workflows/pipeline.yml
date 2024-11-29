@@ -60,13 +60,13 @@ jobs:
         id: build-image
         run: |
           # Listar conteúdo do diretório para verificar a presença do Dockerfile
-          ls -l
+          pwd
           
           # Navegar para o diretório raiz onde o Dockerfile está
           cd ${{ github.workspace }}
 
           # Listar conteúdo do diretório para verificar a presença do Dockerfile
-          ls -l
+          ls
           
           # Verificar se o Dockerfile existe na raiz
           if [ ! -f Dockerfile ]; then
