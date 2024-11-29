@@ -1,7 +1,7 @@
 import { DynamoDBService } from '@Infrastructure/dynamodb.service';
 import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
 
-export class CustomerRepository {
+export class CustomersRepository {
   private dbService: DynamoDBService;
   private tableName = 'Customers';  // Nome da tabela no DynamoDB
 
