@@ -63,7 +63,7 @@ jobs:
           cd ${{ github.workspace }}
           
           # Construir a imagem Docker
-          docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest .
+          docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f Dockerfile .
 
           # Push da imagem para o ECR
           docker push 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest
