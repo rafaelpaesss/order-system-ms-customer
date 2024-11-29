@@ -1,51 +1,43 @@
-import { mockDynamoDB, mockCreateCustomer, mockGetCustomerByCpf, resetMocks } from '@test/mock/functions';
-import { CustomerService } from '@Application/services/customer.service';
+// src/__test__/mock/functions.ts
 
-describe('CustomerService', () => {
-  beforeEach(() => {
-    resetMocks();
-  });
+// Mock para DynamoDB
+export const mockDynamoDB = () => {
+  // Implemente o mock do DynamoDB aqui
+  // Exemplo:
+  return {
+    putItem: jest.fn().mockResolvedValue({}),
+    getItem: jest.fn().mockResolvedValue({}),
+    // Outros métodos do DynamoDB conforme necessário
+  };
+};
 
-  it('should create a new customer', async () => {
-    // Simulando a criação de um cliente
-    mockCreateCustomer.mockResolvedValue({
-      customerId: '123',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    });
+// Mock para criar um cliente
+export const mockCreateCustomer = () => {
+  // Implemente o mock de criação de cliente aqui
+  // Exemplo:
+  return {
+    cpf: '12345678901',
+    name: 'Cliente Teste',
+    password: 'senha123',
+    // Outros campos conforme necessário
+  };
+};
 
-    const customerService = new CustomerService(mockDynamoDB);
-    const result = await customerService.create({
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    });
-
-    expect(result).toEqual({
-      customerId: '123',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    });
-    expect(mockCreateCustomer).toHaveBeenCalled();
-  });
-
-  it('should fetch customer by CPF', async () => {
-    // Simulando a busca de um cliente
-    mockGetCustomerByCpf.mockResolvedValue({
-      customerId: '123',
+// Mock para buscar um cliente por CPF
+export const mockGetCustomerByCpf = (cpf: string) => {
+  // Implemente o mock para buscar cliente por CPF
+  // Exemplo:
+  if (cpf === '12345678901') {
+    return {
       cpf: '12345678901',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    });
+      name: 'Cliente Teste',
+      password: 'senha123', // Senha correta para o teste
+    };
+  }
+  return null; // Retorna null caso o CPF não seja encontrado
+};
 
-    const customerService = new CustomerService(mockDynamoDB);
-    const result = await customerService.getByCpf('12345678901');
-
-    expect(result).toEqual({
-      customerId: '123',
-      cpf: '12345678901',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    });
-    expect(mockGetCustomerByCpf).toHaveBeenCalledWith('12345678901');
-  });
-});
+// Função para resetar mocks
+export const resetMocks = () => {
+  jest.clearAllMocks(); // Reseta todos os mocks do Jest
+};
