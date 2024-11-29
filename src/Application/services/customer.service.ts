@@ -1,6 +1,7 @@
 // src/Application/services/customer.service.ts
 import { Injectable } from '@nestjs/common';
 import { CustomersRepository } from '@Domain/Repositories/customersRepository'; // Repositório de clientes
+import { CreateCustomerDto } from '@Application/dtos/create-customer.dto'; // DTO para criação de cliente
 
 @Injectable()
 export class CustomerService {
@@ -9,18 +10,17 @@ export class CustomerService {
   ) {}
 
   // Método para buscar o cliente pelo CPF e senha
-  async getByCpf(cpf: string, password: string): Promise<Customer | null> {
-    // Lógica para validar o cliente
-    const customer = await this.customersRepository.findByCpf(cpf);
-    if (customer && customer.password === password) { // Comparando senha
-      return customer;
+  async getByCpf(cpf: string, password: string): Promise<any> { // Retorno genérico
+    const customer = await this.customersRepository.findByCpf(cpf); // Busca pelo repositório
+    if (customer && customer.password === password) { // Validação de senha
+      return customer; // Retorna o cliente encontrado
     }
-    return null;
+    return null; // Retorna null se não encontrar
   }
 
   // Método para criar um cliente
-  async create(customerData: CreateCustomerDto): Promise<Customer> {
-    const newCustomer = await this.customersRepository.create(customerData);
-    return newCustomer;
+  async create(customerData: CreateCustomerDto): Promise<any> { // Retorno genérico
+    const newCustomer = await this.customersRepository.create(customerData); // Criação pelo repositório
+    return newCustomer; // Retorna o cliente criado
   }
 }
