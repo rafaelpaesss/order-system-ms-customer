@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomerService } from '../../Application/services/customer.service';
-import { GetCustomerDto } from './dtos/get-customer.dto';
+import { CustomersDto } from './dtos/get-customer.dto';
 
 @ApiTags('Clientes')
 @Controller('customers')
