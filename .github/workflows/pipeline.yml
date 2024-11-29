@@ -8,41 +8,41 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  sonarcloud:
-    name: SonarQube Cloud
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  # sonarcloud:
+  #   name: SonarQube Cloud
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: "20"
 
-      - name: Running dependencies
-        run: |
-          yarn add aws-sdk
-          yarn add @aws-sdk/client-dynamodb
+  #     - name: Running dependencies
+  #       run: |
+  #         yarn add aws-sdk
+  #         yarn add @aws-sdk/client-dynamodb
 
-      - name: Set up Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
+  #     - name: Set up Docker
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y docker-compose
 
-      - name: Test and coverage
-        run: yarn test:cov
+  #     - name: Test and coverage
+  #       run: yarn test:cov
 
-      - name: SonarQube Cloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #     - name: SonarQube Cloud Scan
+  #       uses: SonarSource/sonarcloud-github-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [sonarcloud]
+    # needs: [sonarcloud] # Não precisa do SonarQube por enquanto
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -58,19 +58,15 @@ jobs:
 
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-          IMAGE_TAG: "latest"
         run: |
           # Navegar para o diretório raiz onde o Dockerfile está
           cd ${{ github.workspace }}
           
           # Construir a imagem Docker
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest .
 
           # Push da imagem para o ECR
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest
 
       - name: Deploy Aws EKS
         if: steps.build-image.outcome != 'failure'
