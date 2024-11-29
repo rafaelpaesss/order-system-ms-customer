@@ -1,49 +1,35 @@
-version: '4.34.3'
-
+version: '3'
 services:
-  mysqldb:
-    image: mysql:latest
-    container_name: dbMySql-payments
-    restart: always
-    env_file: ./.env
-    environment:
-      MYSQL_ROOT_PASSWORD: $MYSQLDB_ROOT_PASSWORD
-      MYSQL_DATABASE: $MYSQLDB_DATABASE
+  # Serviço de DynamoDB
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
     ports:
-      - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
-    expose:
-      - $MYSQLDB_LOCAL_PORT
+      - "8000:8000"
+    environment:
+      - AWS_ACCESS_KEY_ID=dynamodb-local
+      - AWS_SECRET_ACCESS_KEY=dynamodb-local
     volumes:
-      - db:/var/lib/mysql
+      - ./dynamodb-data:/home/dynamo/db
     networks:
-      - orderSystem
+      - app-network
 
-  api:
-    depends_on:
-      - mysqldb
-    container_name: nestjs
-    image: nestjs-payments
-    restart: always
+  # Serviço da aplicação
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: ./.env
+    container_name: order-system-app
     ports:
-      - $NODE_LOCAL_PORT:$NODE_LOCAL_PORT
+      - "3000:3000"
     environment:
-      - DATABASE_URL=$DATABASE_URL
-      - USERID=$USERID
-      - POSID=$POSID
-    stdin_open: true
-    tty: true
-    volumes:
-      - .:/app
-      - /app/node_modules
+      - AWS_REGION=us-east-1
+      - DYNAMODB_ENDPOINT=http://dynamodb:8000
+    depends_on:
+      - dynamodb
     networks:
-      - orderSystem
+      - app-network
 
-volumes:
-  db:
 networks:
-  orderSystem:
+  app-network:
     driver: bridge
