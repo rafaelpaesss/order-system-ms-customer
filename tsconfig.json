@@ -4,7 +4,8 @@
     "paths": {
       "@Domain/*": ["src/Domain/*"],
       "@Application/*": ["src/Application/*"],
-      "@Infrastructure/*": ["src/Infrastructure/Apis/*"]
+      "@Infrastructure/*": ["src/Infrastructure/Apis/*"],
+      "@test/*": ["src/__test__/*"]
     },
     "esModuleInterop": true,
     "experimentalDecorators": true,
