@@ -59,8 +59,14 @@ jobs:
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
         run: |
+          # Listar conteúdo do diretório para verificar a presença do Dockerfile
+          ls -l
+          
           # Navegar para o diretório raiz onde o Dockerfile está
           cd ${{ github.workspace }}
+
+          # Listar conteúdo do diretório para verificar a presença do Dockerfile
+          ls -l
           
           # Verificar se o Dockerfile existe na raiz
           if [ ! -f Dockerfile ]; then
