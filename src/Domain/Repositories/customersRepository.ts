@@ -1,5 +1,4 @@
 import { DynamoDBService } from '@Infrastructure/dynamodb.service';
-import { Customer } from '@Domain/Entities/customer.entity';
 import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
 
 export class CustomerRepository {
