@@ -1,4 +1,3 @@
-// src/Infrastructure/Apis/customers.controller.ts
 import {
   Body,
   Controller,
@@ -6,6 +5,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query, // Importando @Query
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomerService } from '../../Application/services/customer.service';
@@ -21,11 +21,10 @@ export class CustomersController {
   @Get(':cpf')
   async getByCpf(
     @Param('cpf') cpf: string,
-    @Body() body: GetCustomerDto, // Use o DTO para validar o corpo da requisição
+    @Query('password') password: string, // Usando @Query para pegar o password
   ) {
     try {
-      const { password } = body; // Extraia o password do corpo da requisição
-      const customer = await this.customerService.getByCpf(cpf, password); // Passando password
+      const customer = await this.customerService.getByCpf(cpf, password); // Passando password via query
       return customer;
     } catch (err: unknown) {
       if (err instanceof Error) {
