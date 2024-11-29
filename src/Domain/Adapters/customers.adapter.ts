@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'; // Supondo uso de NestJS
 import { DynamoDB } from 'aws-sdk'; // SDK do DynamoDB
 import { CustomerRepository } from '@Domain/Repositories/customersRepository';
 import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { Customer } from '@Domain/Entities/customer.entity'; // Certifique-se de importar o tipo Customer
 
 @Injectable()
 export class DynamoDBService {
