@@ -5,7 +5,6 @@ WORKDIR /app
 COPY package.json ./
 COPY yarn.lock ./
 COPY tsconfig.json ./
-COPY ./prisma ./prisma
 
 COPY . .
 
@@ -33,7 +32,6 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/yarn.lock ./
 COPY --from=builder /app/dist/ ./dist/
 COPY --from=builder /app/tsconfig.json ./
-COPY --from=builder /app/prisma ./prisma/
 
 RUN yarn generate
 
