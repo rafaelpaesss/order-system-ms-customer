@@ -1,6 +1,6 @@
 // src/Application/services/customer.service.ts
 import { Injectable } from '@nestjs/common';
-import { CustomersRepository } from '@Domain/Repositories/customersRepository'; // Repositório de clientes
+import { CustomerRepository } from '@Domain/Repositories/customersRepository'; // Repositório de clientes
 
 @Injectable()
 export class CustomerService {
