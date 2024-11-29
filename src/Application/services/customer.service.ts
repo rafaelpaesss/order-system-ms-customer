@@ -1,7 +1,7 @@
 // src/Application/services/customer.service.ts
 import { Injectable } from '@nestjs/common';
 import { CustomersRepository } from '@Domain/Repositories/customersRepository'; // Repositório de clientes
-import { CreateCustomerDto } from '@Application/dtos/create-customer.dto'; // DTO para criação de cliente
+import { CreateCustomerDto } from './Presentation/Customers/dtos/create-customer.dto'; // DTO para criação de cliente
 
 @Injectable()
 export class CustomerService {
