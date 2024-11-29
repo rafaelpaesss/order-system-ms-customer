@@ -62,7 +62,7 @@ jobs:
           # Listar conteúdo do diretório para verificar a presença do Dockerfile
           pwd
           ls
-          ls -la
+          ls -l
           
           # Navegar para o diretório raiz onde o Dockerfile está
           cd ${{ github.workspace }}
