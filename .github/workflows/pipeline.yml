@@ -62,6 +62,12 @@ jobs:
           # Navegar para o diretório raiz onde o Dockerfile está
           cd ${{ github.workspace }}
           
+          # Verificar se o Dockerfile existe na raiz
+          if [ ! -f Dockerfile ]; then
+            echo "Dockerfile não encontrado na raiz do repositório"
+            exit 1
+          fi
+
           # Construir a imagem Docker
           docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f Dockerfile .
 
