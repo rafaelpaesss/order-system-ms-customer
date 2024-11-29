@@ -21,11 +21,11 @@ export class CustomersController {
   @Get(':cpf')
   async getByCpf(
     @Param('cpf') cpf: string,
-    @Body() body: GetCustomerDto, // Use o DTO para validação
+    @Body() body: GetCustomerDto, // Use o DTO para validar o corpo da requisição
   ) {
     try {
       const { password } = body; // Extraia o password do corpo da requisição
-      const customer = await this.customerService.getByCpf(cpf, password);
+      const customer = await this.customerService.getByCpf(cpf, password); // Passando password
       return customer;
     } catch (err: unknown) {
       if (err instanceof Error) {
