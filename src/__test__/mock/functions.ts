@@ -1,5 +1,5 @@
 import { mockDynamoDB, mockCreateCustomer, mockGetCustomerByCpf, resetMocks } from '@test/mock/functions';
-import { CustomerService } from '../../src/Application/services/customer.service';
+import { CustomerService } from './src/Application/services/customer.service';
 
 describe('CustomerService', () => {
   beforeEach(() => {
