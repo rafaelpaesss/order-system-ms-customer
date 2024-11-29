@@ -3,7 +3,7 @@ import { NotFoundException, InternalServerErrorException } from '@nestjs/common'
 
 export class CustomersRepository {
   private dbService: DynamoDBService;
-  private tableName = 'Customers';  // Nome da tabela no DynamoDB
+  private tableName = 'Customers'; // Nome da tabela no DynamoDB
 
   constructor(dbService: DynamoDBService) {
     this.dbService = dbService;
@@ -14,13 +14,13 @@ export class CustomersRepository {
    * @param cpf O CPF do cliente.
    * @returns O cliente, se encontrado, ou null.
    */
-  async findByCpf(cpf: string): Promise<Customer | null> {
+  async findByCpf(cpf: string): Promise<Record<string, any> | null> {
     try {
-      const result = await this.dbService.getItem<Customer>(this.tableName, { cpf });
-      return result || null;  // Retorna o cliente se encontrado, ou null
+      const result = await this.dbService.getCustomerByCpf(cpf);
+      return result || null; // Retorna o cliente se encontrado, ou null
     } catch (error) {
       throw new InternalServerErrorException(
-        'Erro ao buscar cliente no DynamoDB.'
+        'Erro ao buscar cliente no DynamoDB.',
       );
     }
   }
@@ -30,16 +30,16 @@ export class CustomersRepository {
    * @param customerData Dados do cliente.
    * @returns O cliente criado.
    */
-  async create(customerData: Partial<Customer>): Promise<Customer> {
+  async create(customerData: Record<string, any>): Promise<Record<string, any>> {
     try {
       // Salvando o cliente no DynamoDB
-      await this.dbService.putItem(this.tableName, customerData);
-      
+      await this.dbService.saveCustomer(customerData);
+
       // Caso a criação tenha sido bem-sucedida, retornamos os dados do cliente
-      return customerData as Customer;
+      return customerData;
     } catch (error) {
       throw new InternalServerErrorException(
-        'Erro ao criar cliente no DynamoDB.'
+        'Erro ao criar cliente no DynamoDB.',
       );
     }
   }
