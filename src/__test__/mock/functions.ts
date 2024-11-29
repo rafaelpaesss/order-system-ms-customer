@@ -1,67 +1,51 @@
-import prisma from '../../../test/client';
-import { OrdersPayments } from '../../Domain/Interfaces/orders';
-import { Payments } from '../../Domain/Interfaces/payments';
+import { mockDynamoDB, mockCreateCustomer, mockGetCustomerByCpf, resetMocks } from '@test/mock/functions';
+import { CustomerService } from '../../src/Application/services/customer.service';
 
-export async function getPaymentsById(id: number): Promise<Payments | null> {
-  try {
-    return await prisma.payments.findUnique({ where: { id } });
-  } catch (error) {
-    const message = error?.meta?.target || error?.meta?.details;
-    throw new Error(message);
-  }
-}
+describe('CustomerService', () => {
+  beforeEach(() => {
+    resetMocks();
+  });
 
-export async function getPaymentsByOrderId(
-  orderID: number,
-): Promise<Payments | null> {
-  try {
-    return await prisma.payments.findFirst({
-      where: { orderID: orderID },
+  it('should create a new customer', async () => {
+    // Simulando a criação de um cliente
+    mockCreateCustomer.mockResolvedValue({
+      customerId: '123',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
     });
-  } catch (error) {
-    const message = error?.meta?.target || error?.meta?.details;
-    throw new Error(message);
-  }
-}
 
-export async function createPayment(
-  order: OrdersPayments,
-): Promise<Payments | undefined> {
-  try {
-    if (order) {
-      const payments = {
-        salesOrderID: '5ace7194-247b-4c4a-a7a5-1018cd092bb0',
-        qrCode:
-          '00020101021243650016COM.MERCADOLIBRE0201306366b800cf5-e752-4de0-b092-89378a84c6a55204000053039865802BR5911felipe lima6009SAO PAULO62070503***6304B5CA',
-        inStoreOrderID: '6b800cf5-e752-4de0-b092-89378a84c6a5',
-        orderID: 1,
-      };
-
-      const response = await prisma.payments.create({
-        data: { ...payments },
-      });
-
-      return response;
-    }
-  } catch (error) {
-    const message =
-      error?.message || error?.meta?.target || error?.meta?.details;
-    throw new Error(message);
-  }
-}
-
-export async function updatePayment(payments: Payments): Promise<Payments> {
-  try {
-    return await prisma.payments.update({
-      where: {
-        id: payments.id,
-      },
-      data: {
-        ...payments,
-      },
+    const customerService = new CustomerService(mockDynamoDB);
+    const result = await customerService.create({
+      name: 'John Doe',
+      email: 'john.doe@example.com',
     });
-  } catch (error) {
-    const message = error?.meta?.target || error?.meta?.details;
-    throw new Error(message);
-  }
-}
+
+    expect(result).toEqual({
+      customerId: '123',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+    });
+    expect(mockCreateCustomer).toHaveBeenCalled();
+  });
+
+  it('should fetch customer by CPF', async () => {
+    // Simulando a busca de um cliente
+    mockGetCustomerByCpf.mockResolvedValue({
+      customerId: '123',
+      cpf: '12345678901',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+    });
+
+    const customerService = new CustomerService(mockDynamoDB);
+    const result = await customerService.getByCpf('12345678901');
+
+    expect(result).toEqual({
+      customerId: '123',
+      cpf: '12345678901',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+    });
+    expect(mockGetCustomerByCpf).toHaveBeenCalledWith('12345678901');
+  });
+});
