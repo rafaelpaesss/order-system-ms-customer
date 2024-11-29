@@ -1,6 +1,5 @@
 // src/Application/services/customer.service.ts
 import { Injectable } from '@nestjs/common';
-import { Customer } from '@Domain/Entities/customer.entity'; // Certifique-se de que o tipo Customer está correto
 import { CustomersRepository } from '@Domain/Repositories/customersRepository'; // Repositório de clientes
 
 @Injectable()
