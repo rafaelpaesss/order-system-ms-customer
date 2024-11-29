@@ -1,3 +1,4 @@
+// src/Infrastructure/Apis/customers.controller.ts
 import {
   Body,
   Controller,
@@ -5,11 +6,11 @@ import {
   NotFoundException,
   Param,
   Post,
-  BadRequestException, // Adiciona BadRequestException para erros de validação de entrada
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomerService } from '../../Application/services/customer.service';
-import { CustomersDto } from './dtos/customers.dto'; // DTO para a criação de cliente
+import { CustomersDto } from './dtos/customers.dto';
+import { GetCustomerDto } from '../../Application/dtos/get-customer.dto'; // Importe o DTO
 
 @ApiTags('Clientes')
 @Controller('customers')
@@ -18,20 +19,18 @@ export class CustomersController {
 
   // Método para buscar o cliente pelo CPF
   @Get(':cpf')
-  async getByCpf(@Param('cpf') cpf: string, @Body('password') password: string) {
+  async getByCpf(
+    @Param('cpf') cpf: string,
+    @Body() body: GetCustomerDto, // Use o DTO para validação
+  ) {
     try {
-      const customer = await this.customerService.getByCpf(cpf, password); // Passando a senha como argumento
-      if (!customer) {
-        // Se não encontrar o cliente, lançar um erro de não encontrado
-        throw new NotFoundException('Customer could not be found');
-      }
+      const { password } = body; // Extraia o password do corpo da requisição
+      const customer = await this.customerService.getByCpf(cpf, password);
       return customer;
     } catch (err: unknown) {
-      // Verifica se o erro é uma instância de Error
       if (err instanceof Error) {
         throw new NotFoundException(err.message ?? 'Customer could not be found');
       }
-      // Em caso de erro desconhecido, lançar uma exceção genérica
       throw new NotFoundException('Customer could not be found');
     }
   }
@@ -40,16 +39,13 @@ export class CustomersController {
   @Post()
   async save(@Body() dto: CustomersDto) {
     try {
-      // Validação de entrada se necessário, podemos adicionar aqui caso precise de algo específico
       const customer = await this.customerService.create(dto);
       return customer;
     } catch (err: unknown) {
-      // Verifica se o erro é uma instância de Error
       if (err instanceof Error) {
         throw new NotFoundException(err.message ?? 'Customer could not be created');
       }
-      // Lançar uma exceção de BadRequest se os dados enviados estiverem errados ou incompletos
-      throw new BadRequestException('Invalid data provided for customer creation');
+      throw new NotFoundException('Customer could not be created');
     }
   }
 }
