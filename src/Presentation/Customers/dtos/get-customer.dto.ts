@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
-export class GetCustomerDto {
+export class CustomerDto {
   @IsString()
   @IsNotEmpty()
   password: string; // Validação para o password
