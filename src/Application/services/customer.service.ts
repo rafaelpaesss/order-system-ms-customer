@@ -19,8 +19,8 @@ export class CustomerService {
   }
 
   // Método para criar um cliente
-  async create(customerData: CreateCustomerDto): Promise<any> { // Retorno genérico
-    const newCustomer = await this.customersRepository.create(customerData); // Criação pelo repositório
-    return newCustomer; // Retorna o cliente criado
+  async create(customerData: CustomersDto): Promise<any> {
+    const newCustomer = await this.customersRepository.create(customerData);
+    return newCustomer;
   }
 }
