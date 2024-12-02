@@ -1,72 +1,46 @@
 import { Request, Response, NextFunction } from 'express';
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
-import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';  // Importando o DTO
-import { Customer } from '../../Domain/Interfaces/customer';
+import { CreateCustomerDto } from './dtos/create-customer.dto'; // Ajuste o caminho conforme necessário
 
-const customersRepository = new CustomersRepository();
+export class CustomerController {
+  private customersRepository: CustomersRepository;
 
-export const createCustomer = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { cpf, name, email, password }: CreateCustomerDto = req.body;  // Usando o DTO para tipar a requisição
-
-    if (!cpf || !name || !email || !password) {
-      throw new Error('Missing required fields');
-    }
-
-    const customer: Customer = await customersRepository.createCustomer(cpf, name, email, password);
-
-    return res.status(201).json(customer);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(400).json({ message: 'An unknown error occurred' });
+  constructor() {
+    this.customersRepository = new CustomersRepository();
   }
-};
 
-export const getCustomer = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { cpf } = req.params;
+  createCustomer = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { cpf, name, email, password }: CreateCustomerDto = req.body;
 
-    if (!cpf) {
-      throw new Error('Missing CPF');
+      if (!cpf || !name || !email || !password) {
+        throw new Error('Missing required fields');
+      }
+
+      const customer = await this.customersRepository.createCustomer(cpf, name, email, password);
+      return res.status(201).json(customer);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(400).json({ message: error.message });
+      }
+      return res.status(400).json({ message: 'An unknown error occurred' });
     }
+  };
 
-    const customer: Customer | null = await customersRepository.getCustomerByCpf(cpf);
+  getCustomer = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { cpf } = req.params;
+      if (!cpf) throw new Error('Missing CPF');
 
-    if (!customer) {
-      throw new Error('Customer not found');
+      const customer = await this.customersRepository.getCustomerByCpf(cpf);
+      if (!customer) throw new Error('Customer not found');
+
+      return res.status(200).json(customer);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(400).json({ message: error.message });
+      }
+      return res.status(400).json({ message: 'An unknown error occurred' });
     }
-
-    return res.status(200).json(customer);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(400).json({ message: 'An unknown error occurred' });
-  }
-};
-
-export const updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { cpf, name, email, password }: CreateCustomerDto = req.body;  // Usando o DTO também para atualização
-
-    if (!cpf || !name || !email || !password) {
-      throw new Error('Missing required fields');
-    }
-
-    const updatedCustomer = await customersRepository.updateCustomer({
-      cpf,
-      name,
-      email,
-      password,
-    });
-
-    return res.status(200).json(updatedCustomer);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(400).json({ message: 'An unknown error occurred' });
-  }
-};
+  };
+}
