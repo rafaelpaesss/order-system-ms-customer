@@ -1,46 +1,45 @@
-import { DynamoDBService } from '@Infrastructure/dynamodb.service';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
+import { Customer } from '../Interfaces/customer';
 
 export class CustomersRepository {
-  private dbService: DynamoDBService;
-  private tableName = 'Customers'; // Nome da tabela no DynamoDB
+  private dynamoDBService: DynamoDBService;
 
-  constructor(dbService: DynamoDBService) {
-    this.dbService = dbService;
+  constructor() {
+    this.dynamoDBService = new DynamoDBService(process.env.DYNAMODB_TABLE_NAME || "customers-table");
   }
 
-  /**
-   * Encontra um cliente pelo CPF.
-   * @param cpf O CPF do cliente.
-   * @returns O cliente, se encontrado, ou null.
-   */
-  async findByCpf(cpf: string): Promise<Record<string, any> | null> {
-    try {
-      const result = await this.dbService.getCustomerByCpf(cpf);
-      return result || null; // Retorna o cliente se encontrado, ou null
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Erro ao buscar cliente no DynamoDB.',
-      );
-    }
+  async createCustomer(cpf: string, name: string, email: string, password: string): Promise<Customer> {
+    // Converte os dados para o formato esperado pelo DynamoDB e faz a inserção
+    const customer = {
+      cpf,
+      name,
+      email,
+      password,  // Senha em texto simples
+    };
+
+    // Insere o cliente no DynamoDB e retorna os dados
+    await this.dynamoDBService.putItem(customer);
+    return customer;
   }
 
-  /**
-   * Cria um novo cliente.
-   * @param customerData Dados do cliente.
-   * @returns O cliente criado.
-   */
-  async create(customerData: Record<string, any>): Promise<Record<string, any>> {
-    try {
-      // Salvando o cliente no DynamoDB
-      await this.dbService.saveCustomer(customerData);
+  async getCustomerByCpf(cpf: string): Promise<Customer | null> {
+    // Realiza a busca do cliente pelo CPF no DynamoDB
+    const result = await this.dynamoDBService.getItem(cpf);
 
-      // Caso a criação tenha sido bem-sucedida, retornamos os dados do cliente
-      return customerData;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Erro ao criar cliente no DynamoDB.',
-      );
-    }
+    // Retorna null caso não encontre o cliente
+    if (!result) return null;
+
+    return {
+      cpf: result.cpf,
+      name: result.name,
+      email: result.email,
+      password: result.password,  // Senha em texto simples
+    };
+  }
+
+  async updateCustomer(customer: Customer): Promise<Customer> {
+    // Atualiza o cliente no DynamoDB
+    await this.dynamoDBService.updateItem(customer.cpf, customer);
+    return customer;
   }
 }
