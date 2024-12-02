@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { DynamoDBService } from '../Infrastructure/Apis/dynamodb.service';
+import { CustomerService } from '../../Application/services/customer.service';
 
-const dynamoDBService = new DynamoDBService(process.env.DYNAMODB_TABLE_NAME || "customers-table");
+const customerService = new CustomerService();
 
 export class CustomersController {
   static async createCustomer(req: Request, res: Response) {
@@ -12,7 +12,7 @@ export class CustomersController {
     }
 
     try {
-      const customer = await dynamoDBService.createCustomer(cpf, name, email);
+      const customer = await customerService.createCustomer(cpf, name, email);
       return res.status(201).json(customer);
     } catch (error) {
       return res.status(500).json({ message: error.message });
@@ -27,10 +27,7 @@ export class CustomersController {
     }
 
     try {
-      const customer = await dynamoDBService.getCustomerByCpf(cpf);
-      if (!customer) {
-        return res.status(404).json({ message: "Customer not found" });
-      }
+      const customer = await customerService.getCustomer(cpf);
       return res.status(200).json(customer);
     } catch (error) {
       return res.status(500).json({ message: error.message });
