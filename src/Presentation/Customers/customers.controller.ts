@@ -1,46 +1,30 @@
-import { Request, Response, NextFunction } from 'express';
+import { Controller, Post, Get, Body, Param } from '@nestjs/common'; // Certifique-se de que o NestJS está configurado corretamente
+import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
-import { CreateCustomerDto } from './dtos/create-customer.dto'; // Ajuste o caminho conforme necessário
+import { Customer } from '../../Domain/Interfaces/customer';
 
-export class CustomerController {
-  private customersRepository: CustomersRepository;
+@Controller('customers')
+export class CustomersController {
+  private customersRepository = new CustomersRepository();
 
-  constructor() {
-    this.customersRepository = new CustomersRepository();
+  @Post()
+  async createCustomer(@Body() createCustomerDto: CreateCustomerDto) {
+    const { cpf, name, email, password } = createCustomerDto;
+    const customer: Customer = await this.customersRepository.createCustomer(
+      cpf,
+      name,
+      email,
+      password,
+    );
+    return customer;
   }
 
-  createCustomer = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { cpf, name, email, password }: CreateCustomerDto = req.body;
-
-      if (!cpf || !name || !email || !password) {
-        throw new Error('Missing required fields');
-      }
-
-      const customer = await this.customersRepository.createCustomer(cpf, name, email, password);
-      return res.status(201).json(customer);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return res.status(400).json({ message: error.message });
-      }
-      return res.status(400).json({ message: 'An unknown error occurred' });
+  @Get(':cpf')
+  async getCustomer(@Param('cpf') cpf: string) {
+    const customer = await this.customersRepository.getCustomerByCpf(cpf);
+    if (!customer) {
+      throw new Error('Customer not found');
     }
-  };
-
-  getCustomer = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { cpf } = req.params;
-      if (!cpf) throw new Error('Missing CPF');
-
-      const customer = await this.customersRepository.getCustomerByCpf(cpf);
-      if (!customer) throw new Error('Customer not found');
-
-      return res.status(200).json(customer);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return res.status(400).json({ message: error.message });
-      }
-      return res.status(400).json({ message: 'An unknown error occurred' });
-    }
-  };
+    return customer;
+  }
 }
