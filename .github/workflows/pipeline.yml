@@ -65,22 +65,9 @@ jobs:
           # Listar conteúdo do diretório para verificar a presença do Dockerfile
           pwd
           ls
-          ls -l
           
-          # Navegar para o diretório raiz onde o Dockerfile está
-          cd ${{ github.workspace }}
-
-          # Listar conteúdo do diretório para verificar a presença do Dockerfile
-          ls
-          
-          # Verificar se o Dockerfile existe na raiz
-          if [ ! -f dockerfile ]; then
-            echo "Dockerfile não encontrado na raiz do repositório"
-            exit 1
-          fi
-
           # Construir a imagem Docker
-          docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f dockerfile .
+          docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f dockerfile
 
           # Push da imagem para o ECR
           docker push 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest
