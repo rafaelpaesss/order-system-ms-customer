@@ -5,7 +5,7 @@ import { DynamoDBService } from './Infrastructure/Apis/dynamodb.service';
 
 @Module({
   imports: [],
-  controllers: [CustomersController],
+  controllers: [CustomerController],
   providers: [CustomerService, DynamoDBService],
 })
 export class AppModule {}
