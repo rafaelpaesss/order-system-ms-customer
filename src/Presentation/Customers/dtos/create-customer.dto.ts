@@ -2,5 +2,12 @@ export class CreateCustomerDto {
   cpf: string;
   name: string;
   email: string;
-  password: string;  // Senha em texto simples (não segura para produção)
+  password: string;
+
+  constructor(cpf: string, name: string, email: string, password: string) {
+    this.cpf = cpf;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+  }
 }
