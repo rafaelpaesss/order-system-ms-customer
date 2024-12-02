@@ -67,7 +67,7 @@ jobs:
           ls
           
           # Construir a imagem Docker
-          docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f dockerfile
+          docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f dockerfile .
 
           # Push da imagem para o ECR
           docker push 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest
