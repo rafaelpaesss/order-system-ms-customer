@@ -42,18 +42,15 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    # needs: [sonarcloud] # Não precisa do SonarQube por enquanto
+    #needs: [sonarcloud]
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
