@@ -1,7 +1,7 @@
 // src/Presentation/Customers/customers.module.ts
 
 import { Module } from '@nestjs/common';
-import { CustomerController } from './customer.controller';  // Controller
+import { CustomerController } from './customers.controller';  // Controller
 import { CustomerService } from '../../Application/services/customer.service';  // Serviço de lógica de negócios
 import { CustomerRepository } from '../../Domain/customersRepository';  // Repositório
 import { DynamoDBService } from '../../Infrastructure/dynamodb.service';  // Serviço de integração com DynamoDB
