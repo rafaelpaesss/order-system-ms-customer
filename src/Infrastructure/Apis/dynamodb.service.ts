@@ -1,5 +1,6 @@
 // src/Infrastructure/dynamodb.service.ts
 import { DynamoDB } from 'aws-sdk';
+import { BadRequestError, NotFoundError } from '../../Domain/Errors';
 
 export class DynamoDBService {
   private db: DynamoDB.DocumentClient;
