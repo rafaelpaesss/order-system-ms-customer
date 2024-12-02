@@ -1,4 +1,4 @@
-import { DynamoDBService } from '../../Infrastructure/dynamodb.service';
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { Customer } from '../Interfaces/customer';
 
 export class CustomersRepository {
