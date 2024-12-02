@@ -12,8 +12,8 @@ import { ApiService } from '../../Infrastructure/Apis/api.service';  // Serviço
   controllers: [CustomersController],  // Controller para mapear as rotas
   providers: [
     ApiService,  // Serviço que coordena as operações da API
-    CustomerService,  // Serviço de lógica de clientes
-    CustomerRepository,  // Repositório de dados
+    CustomersService,  // Serviço de lógica de clientes
+    CustomersRepository,  // Repositório de dados
     DynamoDBService,  // Serviço de integração com o DynamoDB
   ],
 })
