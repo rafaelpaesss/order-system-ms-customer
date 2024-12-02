@@ -43,6 +43,7 @@ describe('CustomersController', () => {
         json: jest.fn().mockReturnThis(),
       };
 
+      // Ajuste na chamada para passar apenas 1 argumento, o mock da requisição
       await controller.createCustomer({ body: createCustomerDto } as any, res as Response);
 
       // Verifica se a resposta do controlador é a esperada
