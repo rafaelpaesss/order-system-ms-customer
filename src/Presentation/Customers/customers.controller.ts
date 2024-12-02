@@ -1,36 +1,54 @@
 import { Request, Response } from 'express';
 import { CustomerService } from '../../Application/services/customer.service';
-
-const customerService = new CustomerService();
+import { CreateCustomerDto } from './dtos/create-customer.dto';
+import { CustomerDto } from './dtos/customers.dto';
 
 export class CustomersController {
-  static async createCustomer(req: Request, res: Response) {
-    const { cpf, name, email } = req.body;
+  private customerService: CustomerService;
 
-    if (!cpf || !name || !email) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
+  constructor() {
+    this.customerService = new CustomerService();
+  }
 
+  async createCustomer(req: Request, res: Response): Promise<Response> {
     try {
-      const customer = await customerService.createCustomer(cpf, name, email);
-      return res.status(201).json(customer);
+      const createCustomerDto: CreateCustomerDto = req.body;
+
+      const customer = await this.customerService.createCustomer(
+        createCustomerDto.cpf,
+        createCustomerDto.name,
+        createCustomerDto.email,
+        createCustomerDto.password
+      );
+
+      // Transformando os dados no formato adequado
+      const customerDto: CustomerDto = {
+        cpf: customer.cpf,
+        name: customer.name,
+        email: customer.email
+      };
+
+      return res.status(201).json(customerDto);
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   }
 
-  static async getCustomer(req: Request, res: Response) {
-    const { cpf } = req.params;
-
-    if (!cpf) {
-      return res.status(400).json({ message: "CPF is required" });
-    }
-
+  async getCustomer(req: Request, res: Response): Promise<Response> {
     try {
-      const customer = await customerService.getCustomer(cpf);
-      return res.status(200).json(customer);
+      const { cpf, password } = req.body;
+
+      const customer = await this.customerService.getCustomer(cpf, password);
+
+      const customerDto: CustomerDto = {
+        cpf: customer.cpf,
+        name: customer.name,
+        email: customer.email
+      };
+
+      return res.status(200).json(customerDto);
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   }
 }
