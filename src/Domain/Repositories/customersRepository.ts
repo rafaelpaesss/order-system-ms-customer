@@ -1,5 +1,5 @@
 // src/Domain/Repositories/customersRepository.ts
-import { DynamoDBService } from '../../Infrastructure/dynamodb.service';  // Corrigido para o caminho correto
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';  // Corrigido para o caminho correto
 import { Customer } from '../Interfaces/customer';  // Supondo que você tenha uma interface de Customer
 
 export class CustomersRepository {
