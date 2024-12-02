@@ -2,5 +2,5 @@ export interface Customer {
   cpf: string;
   name: string;
   email: string;
-  password: string;  // Senha criptografada
+  password: string;
 }
