@@ -1,46 +1,66 @@
-import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
-import { Customer } from '../../Domain/Interfaces/customer';
+import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
+import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';
+import { CustomerDto } from '../../Presentation/Customers/dtos/customers.dto';
 import { BadRequestError, NotFoundError } from '../../Domain/Errors';
+import { Customer } from '../../Domain/Interfaces/customer';
 
 export class CustomerService {
-  private dynamoDBService: DynamoDBService;
+  private customersRepository: CustomersRepository;
 
   constructor() {
-    this.dynamoDBService = new DynamoDBService(process.env.DYNAMODB_TABLE_NAME || "customers-table");
+    this.customersRepository = new CustomersRepository();
   }
 
-  async createCustomer(cpf: string, name: string, email: string, password: string): Promise<Customer> {
+  async createCustomer(createCustomerDto: CreateCustomerDto): Promise<CustomerDto> {
+    const { cpf, name, email, password } = createCustomerDto;
+
+    // Verifica se todos os campos necessários estão presentes
     if (!cpf || !name || !email || !password) {
-      throw new BadRequestError("Missing required fields");
+      throw new BadRequestError('Missing required fields');
     }
 
     // Verifica se o cliente já existe
-    const existingCustomer = await this.dynamoDBService.getCustomerByCpf(cpf);
+    const existingCustomer = await this.customersRepository.getCustomerByCpf(cpf);
     if (existingCustomer) {
-      throw new BadRequestError("Customer already exists");
+      throw new BadRequestError('Customer already exists');
     }
 
-    // Criação do cliente no DynamoDB com a senha em texto simples
-    const customer = await this.dynamoDBService.createCustomer(cpf, name, email, password);
-    return customer;
+    // Criação do cliente
+    const customer: Customer = await this.customersRepository.createCustomer(cpf, name, email, password);
+
+    // Retorna um DTO com os dados do cliente, sem a senha
+    const customerDto: CustomerDto = {
+      cpf: customer.cpf,
+      name: customer.name,
+      email: customer.email,
+    };
+
+    return customerDto;
   }
 
-  async getCustomer(cpf: string, password: string): Promise<Customer> {
+  async getCustomer(cpf: string, password: string): Promise<CustomerDto> {
     if (!cpf || !password) {
-      throw new BadRequestError("CPF and password are required");
+      throw new BadRequestError('CPF and password are required');
     }
 
-    // Busca o cliente no DynamoDB
-    const customer = await this.dynamoDBService.getCustomerByCpf(cpf);
+    // Busca o cliente pelo CPF
+    const customer = await this.customersRepository.getCustomerByCpf(cpf);
     if (!customer) {
-      throw new NotFoundError("Customer not found");
+      throw new NotFoundError('Customer not found');
     }
 
     // Verifica a senha
     if (customer.password !== password) {
-      throw new BadRequestError("Invalid password");
+      throw new BadRequestError('Invalid password');
     }
 
-    return customer;
+    // Retorna um DTO com os dados do cliente, sem a senha
+    const customerDto: CustomerDto = {
+      cpf: customer.cpf,
+      name: customer.name,
+      email: customer.email,
+    };
+
+    return customerDto;
   }
 }
