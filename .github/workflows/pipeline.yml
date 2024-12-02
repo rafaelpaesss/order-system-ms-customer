@@ -66,6 +66,7 @@ jobs:
           # Listar conteúdo do diretório para verificar a presença do Dockerfile
           pwd
           ls
+          npm install aws-sdk
           
           # Construir a imagem Docker
           docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f dockerfile .
