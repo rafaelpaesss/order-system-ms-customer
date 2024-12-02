@@ -23,6 +23,8 @@ jobs:
 
       - name: Running dependencies
         run: |
+          npm install jest-cucumber
+          npm install @types/jest-cucumber --save-dev
           yarn add aws-sdk
           yarn add @aws-sdk/client-dynamodb
 
