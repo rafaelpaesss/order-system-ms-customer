@@ -1,49 +1,39 @@
-import {
-  Body,
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  Post,
-  Query, // Importando @Query
-} from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { CustomerService } from '../../Application/services/customer.service';
-import { CustomersDto } from './dtos/get-customer.dto';
+import { Request, Response } from 'express';
+import { DynamoDBService } from '../Infrastructure/Apis/dynamodb.service';
 
-@ApiTags('Clientes')
-@Controller('customers')
+const dynamoDBService = new DynamoDBService(process.env.DYNAMODB_TABLE_NAME || "customers-table");
+
 export class CustomersController {
-  constructor(private readonly customerService: CustomerService) {}
+  static async createCustomer(req: Request, res: Response) {
+    const { cpf, name, email } = req.body;
 
-  // Método para buscar o cliente pelo CPF
-  @Get(':cpf')
-  async getByCpf(
-    @Param('cpf') cpf: string,
-    @Query('password') password: string, // Usando @Query para pegar o password
-  ) {
+    if (!cpf || !name || !email) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     try {
-      const customer = await this.customerService.getByCpf(cpf, password); // Passando password via query
-      return customer;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        throw new NotFoundException(err.message ?? 'Customer could not be found');
-      }
-      throw new NotFoundException('Customer could not be found');
+      const customer = await dynamoDBService.createCustomer(cpf, name, email);
+      return res.status(201).json(customer);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
   }
 
-  // Método para criar um cliente
-  @Post()
-  async save(@Body() dto: CustomersDto) {
+  static async getCustomer(req: Request, res: Response) {
+    const { cpf } = req.params;
+
+    if (!cpf) {
+      return res.status(400).json({ message: "CPF is required" });
+    }
+
     try {
-      const customer = await this.customerService.create(dto);
-      return customer;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        throw new NotFoundException(err.message ?? 'Customer could not be created');
+      const customer = await dynamoDBService.getCustomerByCpf(cpf);
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
       }
-      throw new NotFoundException('Customer could not be created');
+      return res.status(200).json(customer);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
   }
 }
