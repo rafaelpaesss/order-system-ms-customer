@@ -1,38 +1,31 @@
-import express from 'express';
+// src/swagger.ts
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { CustomersController } from './Presentation/Customers/customers.controller';
+import { INestApplication, NestFactory } from '@nestjs/common';
+import { AppModule } from './app.module';
 
-const app = express();
-app.use(express.json());
+async function bootstrap() {
+  const app: INestApplication = await NestFactory.create(AppModule);
 
-// Swagger configuration
-const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Customer API',
-      version: '1.0.0',
-      description: 'API for managing customers in DynamoDB',
-    },
-    servers: [
-      {
-        url: 'http://localhost:3000', // Ou a URL do seu servidor EKS
+  // Configuração do Swagger
+  const options = {
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: 'API Documentation',
+        version: '1.0.0',
+        description: 'API for managing customers',
       },
-    ],
-  },
-  apis: ['./src/Presentation/Customers/customers.controller.ts'], // Path para o arquivo que contém as anotações da API
-};
+    },
+    // Caminho dos arquivos com comentários JSDoc
+    apis: ['./src/**/*.controller.ts'],
+  };
 
-const specs = swaggerJsdoc(options);
+  const specs = swaggerJsdoc(options);
 
-// Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+  // Usando o swagger-ui-express para exibir a interface Swagger
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
-// Definindo os endpoints
-app.post('/customers', CustomersController.createCustomer);
-app.get('/customers/:cpf', CustomersController.getCustomer);
-
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
-});
+  await app.listen(3000);
+}
+bootstrap();
