@@ -1,17 +1,16 @@
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { Customer } from '../../Domain/Interfaces/customer';
+import { BadRequestError, NotFoundError } from '../../Domain/Errors';
 
 export class CustomerService {
   private dynamoDBService: DynamoDBService;
 
   constructor() {
-    // A tabela do DynamoDB é configurada a partir de uma variável de ambiente
     this.dynamoDBService = new DynamoDBService(process.env.DYNAMODB_TABLE_NAME || "customers-table");
   }
 
-  async createCustomer(cpf: string, name: string, email: string): Promise<Customer> {
-    // Validação básica (pode ser expandida)
-    if (!cpf || !name || !email) {
+  async createCustomer(cpf: string, name: string, email: string, password: string): Promise<Customer> {
+    if (!cpf || !name || !email || !password) {
       throw new BadRequestError("Missing required fields");
     }
 
@@ -21,21 +20,25 @@ export class CustomerService {
       throw new BadRequestError("Customer already exists");
     }
 
-    // Criação do cliente no DynamoDB
-    const customer = await this.dynamoDBService.createCustomer(cpf, name, email);
+    // Criação do cliente no DynamoDB com a senha em texto simples
+    const customer = await this.dynamoDBService.createCustomer(cpf, name, email, password);
     return customer;
   }
 
-  async getCustomer(cpf: string): Promise<Customer> {
-    // Validação básica
-    if (!cpf) {
-      throw new BadRequestError("CPF is required");
+  async getCustomer(cpf: string, password: string): Promise<Customer> {
+    if (!cpf || !password) {
+      throw new BadRequestError("CPF and password are required");
     }
 
     // Busca o cliente no DynamoDB
     const customer = await this.dynamoDBService.getCustomerByCpf(cpf);
     if (!customer) {
       throw new NotFoundError("Customer not found");
+    }
+
+    // Verifica a senha
+    if (customer.password !== password) {
+      throw new BadRequestError("Invalid password");
     }
 
     return customer;
