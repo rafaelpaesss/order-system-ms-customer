@@ -1,7 +1,8 @@
 // src/swagger.ts
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { INestApplication, NestFactory } from '@nestjs/core';  // Corrigido
+import { NestFactory } from '@nestjs/core';
+import { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
