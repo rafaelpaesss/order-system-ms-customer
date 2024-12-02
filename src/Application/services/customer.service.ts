@@ -1,26 +1,43 @@
-// src/Application/services/customer.service.ts
-import { Injectable } from '@nestjs/common';
-import { CustomersRepository } from '@Domain/Repositories/customersRepository'; // Repositório de clientes
-import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
+import { Customer } from '../../Domain/Interfaces/customer';
 
-@Injectable()
 export class CustomerService {
-  constructor(
-    private readonly customersRepository: CustomersRepository, // Injeção do repositório
-  ) {}
+  private dynamoDBService: DynamoDBService;
 
-  // Método para buscar o cliente pelo CPF e senha
-  async getByCpf(cpf: string, password: string): Promise<any> { // Retorno genérico
-    const customer = await this.customersRepository.findByCpf(cpf); // Busca pelo repositório
-    if (customer && customer.password === password) { // Validação de senha
-      return customer; // Retorna o cliente encontrado
-    }
-    return null; // Retorna null se não encontrar
+  constructor() {
+    // A tabela do DynamoDB é configurada a partir de uma variável de ambiente
+    this.dynamoDBService = new DynamoDBService(process.env.DYNAMODB_TABLE_NAME || "customers-table");
   }
 
-  // Método para criar um cliente
-  async create(customerData: CustomersDto): Promise<any> {
-    const newCustomer = await this.customersRepository.create(customerData);
-    return newCustomer;
+  async createCustomer(cpf: string, name: string, email: string): Promise<Customer> {
+    // Validação básica (pode ser expandida)
+    if (!cpf || !name || !email) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    // Verifica se o cliente já existe
+    const existingCustomer = await this.dynamoDBService.getCustomerByCpf(cpf);
+    if (existingCustomer) {
+      throw new BadRequestError("Customer already exists");
+    }
+
+    // Criação do cliente no DynamoDB
+    const customer = await this.dynamoDBService.createCustomer(cpf, name, email);
+    return customer;
+  }
+
+  async getCustomer(cpf: string): Promise<Customer> {
+    // Validação básica
+    if (!cpf) {
+      throw new BadRequestError("CPF is required");
+    }
+
+    // Busca o cliente no DynamoDB
+    const customer = await this.dynamoDBService.getCustomerByCpf(cpf);
+    if (!customer) {
+      throw new NotFoundError("Customer not found");
+    }
+
+    return customer;
   }
 }
