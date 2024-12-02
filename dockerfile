@@ -1,40 +1,40 @@
-FROM node:20 as builder
+# Etapa 1: Construção da imagem
+FROM node:20-alpine AS builder
 
+# Definir diretório de trabalho
 WORKDIR /app
 
-COPY package.json ./
-COPY yarn.lock ./
+# Copiar arquivos de configuração
+COPY package*.json ./
 COPY tsconfig.json ./
+COPY tsconfig.build.json ./
 
+# Instalar dependências
+RUN npm install
+
+# Copiar todos os arquivos do projeto
 COPY . .
 
-# Install app dependencies
-RUN yarn
-RUN yarn build
+# Compilar o código TypeScript
+RUN npm run build
 
-FROM node:20 as runner 
+# Etapa 2: Criação da imagem final para produção
+FROM node:20-alpine
 
-WORKDIR /app 
+# Definir diretório de trabalho
+WORKDIR /app
 
-ENV DATABASE_URL="uri"
-ENV USERID="uri"
-ENV POSID="uri"
-ENV NODE_LOCAL_PORT="uri"
-ENV ENDPOINT="uri"
-ENV QUEUE="uri"
-ENV AWS_REGION="us-east-1"
-ENV AWS_ACCESS_KEY_ID="uri"
-ENV AWS_SECRET_ACCESS_KEY="uri"
-ENV AWS_SESSION_TOKEN="uri"
-
-COPY --from=builder /app/node_modules ./node_modules/
+# Copiar arquivos necessários da etapa anterior
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/yarn.lock ./
-COPY --from=builder /app/dist/ ./dist/
-COPY --from=builder /app/tsconfig.json ./
 
-RUN yarn generate
+# Definir variáveis de ambiente para produção
+ENV NODE_ENV=production
+ENV PORT=3000
 
+# Expor a porta do container
 EXPOSE 3000
 
-CMD ["yarn", "start:migrate:prod"]
+# Comando para rodar a aplicação no ambiente de produção
+CMD ["node", "dist/main.js"]
