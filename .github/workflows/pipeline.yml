@@ -67,6 +67,8 @@ jobs:
           pwd
           ls
           npm install aws-sdk
+          npm install swagger-ui-express
+          npm install swagger-jsdoc
           
           # Construir a imagem Docker
           docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f dockerfile .
