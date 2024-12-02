@@ -64,6 +64,7 @@ jobs:
         run: |
           yarn add aws-sdk
           yarn add @aws-sdk/client-dynamodb
+          npm install @nestjs/core
           npm install aws-sdk
           npm install --save-dev @types/swagger-jsdoc @types/swagger-ui-express
   
