@@ -3,8 +3,8 @@
 import { Module } from '@nestjs/common';
 import { CustomerController } from './customers.controller';  // Controller
 import { CustomerService } from '../../Application/services/customer.service';  // Serviço de lógica de negócios
-import { CustomerRepository } from '../../Domain/customersRepository';  // Repositório
-import { DynamoDBService } from '../../Infrastructure/dynamodb.service';  // Serviço de integração com DynamoDB
+import { CustomerRepository } from '../../Domain/Repositories/customersRepository';  // Repositório
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';  // Serviço de integração com DynamoDB
 import { ApiService } from '../../Infrastructure/Apis/api.service';  // Serviço da API
 
 @Module({
