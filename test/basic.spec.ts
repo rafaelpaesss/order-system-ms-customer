@@ -3,8 +3,6 @@ import { CustomersController } from '../src/Presentation/Customers/customers.con
 import { CustomerService } from '../src/Application/services/customer.service';
 import { DynamoDBService } from '../src/Infrastructure/Apis/dynamodb.service';
 import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
-import { HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
 
 describe('CustomersController', () => {
   let controller: CustomersController;
@@ -37,24 +35,14 @@ describe('CustomersController', () => {
       // Mock do serviço para retornar o cliente criado
       jest.spyOn(service, 'createCustomer').mockResolvedValue(createCustomerDto);
 
-      // Simula a resposta HTTP
-      const res: Partial<Response> = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis(),
-      };
+      const response = await controller.createCustomer(createCustomerDto);
 
-      // Simula a requisição
-      const req: any = { body: createCustomerDto };
-
-      // Chama o método do controlador com a requisição e o mock da resposta
-      await controller.createCustomer(req, res as Response);
-
-      // Verifica se a resposta foi corretamente configurada
-      expect(res.status).toHaveBeenCalledWith(HttpStatus.CREATED);  // 201
-      expect(res.json).toHaveBeenCalledWith({
+      // Verifica se a resposta do controlador é a esperada
+      expect(response).toEqual({
         cpf: '12345678900',
         name: 'John Doe',
         email: 'johndoe@example.com',
+        password: 'password123',
       });
     });
   });
