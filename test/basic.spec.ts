@@ -43,10 +43,13 @@ describe('CustomersController', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      // Ajuste na chamada para passar apenas 1 argumento, o mock da requisição
-      await controller.createCustomer({ body: createCustomerDto } as any, res as Response);
+      // Simula a requisição
+      const req: any = { body: createCustomerDto };
 
-      // Verifica se a resposta do controlador é a esperada
+      // Chama o método do controlador com a requisição e o mock da resposta
+      await controller.createCustomer(req, res as Response);
+
+      // Verifica se a resposta foi corretamente configurada
       expect(res.status).toHaveBeenCalledWith(HttpStatus.CREATED);  // 201
       expect(res.json).toHaveBeenCalledWith({
         cpf: '12345678900',
