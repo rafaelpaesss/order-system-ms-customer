@@ -1,28 +1,34 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
-    "paths": {
-      "@Domain/*": ["src/Domain/*"],
-      "@Application/*": ["src/Application/*"],
-      "@Infrastructure/*": ["src/Infrastructure/Apis/*"],
-      "@test/*": ["src/__test__/*"],
-      "@dtos/*": ["src/Presentation/Customers/dtos/*"]
-    },
+    "target": "ES2020", 
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "declaration": false,
+    "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "paths": {
+      "@src/*": ["src/*"]
+    },
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "allowJs": true,
+    "sourceMap": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "target": "ESNext",  // Garantir que a versão alvo do JS seja adequada para o uso moderno
-    "moduleResolution": "node",  // Resolver módulos conforme Node.js
-    "strict": true,  // Habilitar verificações rigorosas no código TypeScript
-    "skipLibCheck": true,  // Ignorar a verificação de tipos de arquivos de bibliotecas
-    "resolveJsonModule": true,  // Permitir a importação de arquivos JSON
-    "noEmitOnError": true,  // Não gerar código se houver erros no TypeScript
-    "outDir": "./dist"  // Definir o diretório de saída para os arquivos compilados
+    "emitDecoratorMetadata": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "test/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist",
+    "coverage",
+    "src/**/*.spec.ts",
+    "src/**/*.e2e-spec.ts"
   ]
 }
