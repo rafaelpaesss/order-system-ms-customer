@@ -1,113 +1,55 @@
-import { Injectable } from '@nestjs/common';
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 
-@Injectable()
 export class DynamoDBService {
-  private dynamoDbClient: DynamoDB.DocumentClient;
+  private client: DynamoDBClient;
+  private tableName: string;
 
-  constructor() {
-    this.dynamoDbClient = new DynamoDB.DocumentClient();
+  constructor(tableName: string) {
+    this.client = new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" });
+    this.tableName = tableName;
   }
 
-  /**
-   * Obtém um item do DynamoDB por chave primária.
-   * @param tableName O nome da tabela.
-   * @param key A chave primária do item.
-   * @returns O item encontrado ou null.
-   */
-  async getItem<T>(tableName: string, key: Record<string, any>): Promise<T | null> {
-    const params: DynamoDB.DocumentClient.GetItemInput = {
-      TableName: tableName,
-      Key: key,
+  async getCustomerByCpf(cpf: string) {
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        cpf: { S: cpf },
+      },
     };
 
     try {
-      const result = await this.dynamoDbClient.get(params).promise();
-      return result.Item as T || null;
+      const data = await this.client.send(new GetItemCommand(params));
+      return data.Item ? DynamoDBService.convertToCustomer(data.Item) : null;
     } catch (error) {
-      console.error('Erro ao buscar item no DynamoDB:', error);
-      throw error;
+      console.error("Error getting customer:", error);
+      throw new Error("Unable to retrieve customer.");
     }
   }
 
-  /**
-   * Salva um item no DynamoDB.
-   * @param tableName O nome da tabela.
-   * @param item O item a ser salvo.
-   */
-  async putItem<T>(tableName: string, item: T): Promise<void> {
-    const params: DynamoDB.DocumentClient.PutItemInput = {
-      TableName: tableName,
-      Item: item,
+  async createCustomer(cpf: string, name: string, email: string) {
+    const params = {
+      TableName: this.tableName,
+      Item: {
+        cpf: { S: cpf },
+        name: { S: name },
+        email: { S: email },
+      },
     };
 
     try {
-      await this.dynamoDbClient.put(params).promise();
+      await this.client.send(new PutItemCommand(params));
+      return { cpf, name, email };
     } catch (error) {
-      console.error('Erro ao salvar item no DynamoDB:', error);
-      throw error;
+      console.error("Error creating customer:", error);
+      throw new Error("Unable to create customer.");
     }
   }
 
-  /**
-   * Deleta um item do DynamoDB por chave primária.
-   * @param tableName O nome da tabela.
-   * @param key A chave primária do item.
-   */
-  async deleteItem(tableName: string, key: Record<string, any>): Promise<void> {
-    const params: DynamoDB.DocumentClient.DeleteItemInput = {
-      TableName: tableName,
-      Key: key,
+  private static convertToCustomer(item: any) {
+    return {
+      cpf: item.cpf.S,
+      name: item.name.S,
+      email: item.email.S,
     };
-
-    try {
-      await this.dynamoDbClient.delete(params).promise();
-    } catch (error) {
-      console.error('Erro ao deletar item no DynamoDB:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Atualiza um item no DynamoDB.
-   * @param tableName O nome da tabela.
-   * @param key A chave primária do item.
-   * @param updates Os valores a serem atualizados.
-   */
-  async updateItem(
-    tableName: string,
-    key: Record<string, any>,
-    updates: Record<string, any>
-  ): Promise<void> {
-    const updateExpressions = Object.keys(updates).map(
-      (attr) => `#${attr} = :${attr}`
-    );
-
-    const expressionAttributeNames = Object.keys(updates).reduce(
-      (acc, attr) => ({ ...acc, [`#${attr}`]: attr }),
-      {}
-    );
-
-    const expressionAttributeValues = Object.keys(updates).reduce(
-      (acc, attr) => ({ ...acc, [`:${attr}`]: updates[attr] }),
-      {}
-    );
-
-    const params: DynamoDB.DocumentClient.UpdateItemInput = {
-      TableName: tableName,
-      Key: key,
-      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
-    };
-
-    try {
-      await this.dynamoDbClient.update(params).promise();
-    } catch (error) {
-      console.error('Erro ao atualizar item no DynamoDB:', error);
-      throw error;
-    }
   }
 }
-
-export { DynamoDBService }; 
