@@ -9,7 +9,7 @@ import { ApiService } from '../../Infrastructure/Apis/api.service';  // Serviço
 
 @Module({
   imports: [],
-  controllers: [CustomerController],  // Controller para mapear as rotas
+  controllers: [CustomersController],  // Controller para mapear as rotas
   providers: [
     ApiService,  // Serviço que coordena as operações da API
     CustomerService,  // Serviço de lógica de clientes
