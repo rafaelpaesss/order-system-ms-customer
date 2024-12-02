@@ -19,8 +19,12 @@ describe('API Client Tests', () => {
         name: 'John Doe',
         email: 'johndoe@example.com',
       });
-    } catch (error) {
-      throw new Error(`Failed to create customer: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to create customer: ${error.message}`);
+      } else {
+        throw new Error('An unknown error occurred while creating customer');
+      }
     }
   });
 
@@ -38,8 +42,12 @@ describe('API Client Tests', () => {
         name: 'John Doe',
         email: 'johndoe@example.com',
       });
-    } catch (error) {
-      throw new Error(`Failed to retrieve customer: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to retrieve customer: ${error.message}`);
+      } else {
+        throw new Error('An unknown error occurred while retrieving customer');
+      }
     }
   });
 });
