@@ -1,43 +1,33 @@
-// src/__test__/mock/functions.ts
+import { Customer } from '../../Domain/Interfaces/customer';
 
-// Mock para DynamoDB
-export const mockDynamoDB = () => {
-  // Implemente o mock do DynamoDB aqui
-  // Exemplo:
-  return {
-    putItem: jest.fn().mockResolvedValue({}),
-    getItem: jest.fn().mockResolvedValue({}),
-    // Outros métodos do DynamoDB conforme necessário
-  };
-};
+// Função mock para simular um cliente
+export const mockCustomer = (cpf: string): Customer => ({
+  cpf,
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+  password: 'password123', // Simule uma senha para o teste
+});
 
-// Mock para criar um cliente
-export const mockCreateCustomer = () => {
-  // Implemente o mock de criação de cliente aqui
-  // Exemplo:
-  return {
-    cpf: '12345678901',
-    name: 'Cliente Teste',
-    password: 'senha123',
-    // Outros campos conforme necessário
-  };
-};
-
-// Mock para buscar um cliente por CPF
-export const mockGetCustomerByCpf = (cpf: string) => {
-  // Implemente o mock para buscar cliente por CPF
-  // Exemplo:
-  if (cpf === '12345678901') {
-    return {
-      cpf: '12345678901',
-      name: 'Cliente Teste',
-      password: 'senha123', // Senha correta para o teste
-    };
+// Função mock para simular o comportamento do CustomersRepository
+export const mockGetCustomerByCpf = (cpf: string): Customer | null => {
+  // Simula que o cliente com o CPF fornecido existe
+  if (cpf === '12345678900') {
+    return mockCustomer(cpf);
   }
-  return null; // Retorna null caso o CPF não seja encontrado
+  return null; // Simula que o cliente não foi encontrado
 };
 
-// Função para resetar mocks
-export const resetMocks = () => {
-  jest.clearAllMocks(); // Reseta todos os mocks do Jest
+// Função mock para simular a criação de um cliente
+export const mockCreateCustomer = (cpf: string, name: string, email: string, password: string): Customer => {
+  return {
+    cpf,
+    name,
+    email,
+    password,
+  };
+};
+
+// Função para mockar a resposta de erro em uma operação do repository
+export const mockGetCustomerError = () => {
+  throw new Error('Database connection failed');
 };
