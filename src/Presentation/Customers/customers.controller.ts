@@ -14,18 +14,13 @@ export class CustomersController {
     try {
       const createCustomerDto: CreateCustomerDto = req.body;
 
-      const customer = await this.customerService.createCustomer(
-        createCustomerDto.cpf,
-        createCustomerDto.name,
-        createCustomerDto.email,
-        createCustomerDto.password
-      );
+      // Chama o serviço de criação de cliente
+      const customer = await this.customerService.createCustomer(createCustomerDto);
 
-      // Transformando os dados no formato adequado
       const customerDto: CustomerDto = {
         cpf: customer.cpf,
         name: customer.name,
-        email: customer.email
+        email: customer.email,
       };
 
       return res.status(201).json(customerDto);
@@ -38,12 +33,17 @@ export class CustomersController {
     try {
       const { cpf, password } = req.body;
 
+      if (!cpf || !password) {
+        return res.status(400).json({ message: 'CPF and password are required' });
+      }
+
+      // Chama o serviço de busca de cliente
       const customer = await this.customerService.getCustomer(cpf, password);
 
       const customerDto: CustomerDto = {
         cpf: customer.cpf,
         name: customer.name,
-        email: customer.email
+        email: customer.email,
       };
 
       return res.status(200).json(customerDto);
