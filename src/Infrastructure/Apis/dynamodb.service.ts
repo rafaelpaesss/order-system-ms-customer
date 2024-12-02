@@ -1,55 +1,64 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+// src/Infrastructure/dynamodb.service.ts
+import { DynamoDB } from 'aws-sdk';
 
 export class DynamoDBService {
-  private client: DynamoDBClient;
-  private tableName: string;
+  private db: DynamoDB.DocumentClient;
 
-  constructor(tableName: string) {
-    this.client = new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" });
-    this.tableName = tableName;
+  constructor() {
+    this.db = new DynamoDB.DocumentClient();
   }
 
-  async getCustomerByCpf(cpf: string) {
+  // Método para adicionar um item no DynamoDB
+  async putItem(item: any) {
     const params = {
-      TableName: this.tableName,
-      Key: {
-        cpf: { S: cpf },
-      },
+      TableName: 'Customers',  // Nome da tabela no DynamoDB
+      Item: item,
     };
 
     try {
-      const data = await this.client.send(new GetItemCommand(params));
-      return data.Item ? DynamoDBService.convertToCustomer(data.Item) : null;
+      await this.db.put(params).promise();
     } catch (error) {
-      console.error("Error getting customer:", error);
-      throw new Error("Unable to retrieve customer.");
+      throw new Error(`Failed to put item: ${error.message}`);
     }
   }
 
-  async createCustomer(cpf: string, name: string, email: string) {
+  // Método para obter um item do DynamoDB
+  async getItem(cpf: string) {
     const params = {
-      TableName: this.tableName,
-      Item: {
-        cpf: { S: cpf },
-        name: { S: name },
-        email: { S: email },
-      },
+      TableName: 'Customers',  // Nome da tabela
+      Key: { cpf },  // A chave primária que identifica o item
     };
 
     try {
-      await this.client.send(new PutItemCommand(params));
-      return { cpf, name, email };
+      const result = await this.db.get(params).promise();
+      return result.Item;  // Retorna o item obtido
     } catch (error) {
-      console.error("Error creating customer:", error);
-      throw new Error("Unable to create customer.");
+      throw new Error(`Failed to get item: ${error.message}`);
     }
   }
 
-  private static convertToCustomer(item: any) {
-    return {
-      cpf: item.cpf.S,
-      name: item.name.S,
-      email: item.email.S,
+  // Método para atualizar um item no DynamoDB
+  async updateItem(cpf: string, updatedData: any) {
+    const params = {
+      TableName: 'Customers',
+      Key: { cpf },  // Chave para identificar o item
+      UpdateExpression: 'set #name = :name, #email = :email',  // Expressão para atualizar atributos
+      ExpressionAttributeNames: {
+        '#name': 'name',
+        '#email': 'email',
+      },
+      ExpressionAttributeValues: {
+        ':name': updatedData.name,
+        ':email': updatedData.email,
+      },
+      ReturnValues: 'ALL_NEW',  // Retorna o item atualizado
     };
+
+    try {
+      const result = await this.db.update(params).promise();
+      return result.Attributes;  // Retorna o item atualizado
+    } catch (error) {
+      throw new Error(`Failed to update item: ${error.message}`);
+    }
   }
 }
