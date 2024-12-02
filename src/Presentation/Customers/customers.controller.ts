@@ -17,32 +17,15 @@ export class CustomersController {
 
   @Post()
   async createCustomer(@Body() createCustomerDto: CreateCustomerDto) {
-    try {
-      const { cpf, name, email, password } = createCustomerDto;
-  
-      // Chamada para o repositório que realiza a criação do cliente
-      const customer: Customer = await this.customersRepository.createCustomer(
-        cpf,
-        name,
-        email,
-        password,
-      );
-  
-      // Retorno do cliente criado
-      return {
-        message: 'Customer created successfully',
-        data: customer,
-      };
-    } catch (error) {
-      // Tratamento específico para erros conhecidos
-      if (error instanceof SomeSpecificErrorType) {
-        throw new BadRequestException('Specific error message related to the issue');
-      }
-  
-      // Lançamento de exceção genérica para outros casos
-      throw new InternalServerErrorException('Failed to create customer');
-    }
-}
+    const { cpf, name, email, password } = createCustomerDto;
+    const customer: Customer = await this.customersRepository.createCustomer(
+      cpf,
+      name,
+      email,
+      password,
+    );
+    return customer;
+  }
 
   @Get(':cpf')
   async getCustomer(@Param('cpf') cpf: string) {
