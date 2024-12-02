@@ -1,7 +1,6 @@
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
 import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';
 import { CustomerDto } from '../../Presentation/Customers/dtos/customers.dto';
-import { BadRequestError, NotFoundError } from '../../Domain/Errors';
 import { Customer } from '../../Domain/Interfaces/customer';
 
 export class CustomerService {
