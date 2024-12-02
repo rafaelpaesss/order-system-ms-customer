@@ -7,7 +7,7 @@ WORKDIR /app
 # Copiar arquivos de configuração
 COPY package*.json ./
 COPY tsconfig.json ./
-COPY tsconfig.build.json ./
+COPY tsconfig.spec.json ./
 
 # Instalar dependências
 RUN npm install
