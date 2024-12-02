@@ -1,28 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import swaggerInit from './swagger';
-import { Logger } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  try {
-    const app = await NestFactory.create(AppModule);
-    const options = {
-      origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      preflightContinue: false,
-      optionsSuccessStatus: 204,
-      credentials: true,
-    };
-    app.enableCors(options);
+  const app = await NestFactory.create(AppModule);
 
-    // Swagger
-    await swaggerInit(app);
-    const PORT = process.env.NODE_DOCKER_PORT ?? 3000;
-    await app.listen(PORT, () => {
-      Logger.log(`Server is running on port ${PORT}.`);
-    });
-  } catch (error) {
-    Logger.error('Error starting application', error);
-    process.exit(1);
-  }
+  // Aplicando o Global Validation Pipe (caso queira validar as entradas, mas vamos deixar sem isso por enquanto)
+  // app.useGlobalPipes(new ValidationPipe());
+
+  // Configuração de Cors para permitir requisições de outros domínios
+  app.enableCors();
+
+  // Configurar Swagger (caso queira gerar documentação da API automaticamente)
+  // const document = SwaggerModule.createDocument(app, options);
+  // SwaggerModule.setup('api', app, document);
+
+  await app.listen(3000);  // O servidor vai rodar na porta 3000
 }
+bootstrap();
