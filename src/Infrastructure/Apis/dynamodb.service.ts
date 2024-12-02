@@ -3,29 +3,28 @@ import { DynamoDB } from 'aws-sdk';
 
 export class DynamoDBService {
   private tableName: string;
-  private dynamoDB: DynamoDB;
+  private dynamoDB: DynamoDB.DocumentClient;
 
-  // Modificação: Agora o construtor recebe o nome da tabela como argumento
   constructor(tableName: string) {
-    this.tableName = tableName;  // Armazena o nome da tabela
-    this.dynamoDB = new DynamoDB();  // Instancia o DynamoDB
+    this.tableName = tableName;
+    this.dynamoDB = new DynamoDB.DocumentClient();  // Usa o DocumentClient para facilitar o trabalho com dados JSON
   }
 
-  // Método para colocar um item na tabela
-  async putItem(item: any): Promise<any> {
+  // Método para inserir um item na tabela
+  async putItem(item: any): Promise<void> {
     const params: DynamoDB.DocumentClient.PutItemInput = {
       TableName: this.tableName,
-      Item: item
+      Item: item,
     };
 
-    return this.dynamoDB.put(params).promise();
+    await this.dynamoDB.put(params).promise();
   }
 
-  // Método para obter um item da tabela
+  // Método para buscar um item da tabela
   async getItem(cpf: string): Promise<any> {
     const params: DynamoDB.DocumentClient.GetItemInput = {
       TableName: this.tableName,
-      Key: { cpf }
+      Key: { cpf },
     };
 
     const result = await this.dynamoDB.get(params).promise();
@@ -33,22 +32,24 @@ export class DynamoDBService {
   }
 
   // Método para atualizar um item na tabela
-  async updateItem(cpf: string, item: any): Promise<any> {
+  async updateItem(cpf: string, item: any): Promise<void> {
     const params: DynamoDB.DocumentClient.UpdateItemInput = {
       TableName: this.tableName,
       Key: { cpf },
-      UpdateExpression: "set #name = :name, #email = :email",
+      UpdateExpression: "set #name = :name, #email = :email, #password = :password",
       ExpressionAttributeNames: {
         "#name": "name",
-        "#email": "email"
+        "#email": "email",
+        "#password": "password",
       },
       ExpressionAttributeValues: {
         ":name": item.name,
-        ":email": item.email
+        ":email": item.email,
+        ":password": item.password,
       },
-      ReturnValues: "UPDATED_NEW"
+      ReturnValues: "ALL_NEW",
     };
 
-    return this.dynamoDB.update(params).promise();
+    await this.dynamoDB.update(params).promise();
   }
 }
