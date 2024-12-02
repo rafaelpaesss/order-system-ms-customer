@@ -1,65 +1,54 @@
 // src/Infrastructure/dynamodb.service.ts
 import { DynamoDB } from 'aws-sdk';
-import { BadRequestError, NotFoundError } from '../../Domain/Errors';
 
 export class DynamoDBService {
-  private db: DynamoDB.DocumentClient;
+  private tableName: string;
+  private dynamoDB: DynamoDB;
 
-  constructor() {
-    this.db = new DynamoDB.DocumentClient();
+  // Modificação: Agora o construtor recebe o nome da tabela como argumento
+  constructor(tableName: string) {
+    this.tableName = tableName;  // Armazena o nome da tabela
+    this.dynamoDB = new DynamoDB();  // Instancia o DynamoDB
   }
 
-  // Método para adicionar um item no DynamoDB
-  async putItem(item: any) {
-    const params = {
-      TableName: 'Customers',  // Nome da tabela no DynamoDB
-      Item: item,
+  // Método para colocar um item na tabela
+  async putItem(item: any): Promise<any> {
+    const params: DynamoDB.DocumentClient.PutItemInput = {
+      TableName: this.tableName,
+      Item: item
     };
 
-    try {
-      await this.db.put(params).promise();
-    } catch (error) {
-      throw new Error(`Failed to put item: ${error.message}`);
-    }
+    return this.dynamoDB.put(params).promise();
   }
 
-  // Método para obter um item do DynamoDB
-  async getItem(cpf: string) {
-    const params = {
-      TableName: 'Customers',  // Nome da tabela
-      Key: { cpf },  // A chave primária que identifica o item
+  // Método para obter um item da tabela
+  async getItem(cpf: string): Promise<any> {
+    const params: DynamoDB.DocumentClient.GetItemInput = {
+      TableName: this.tableName,
+      Key: { cpf }
     };
 
-    try {
-      const result = await this.db.get(params).promise();
-      return result.Item;  // Retorna o item obtido
-    } catch (error) {
-      throw new Error(`Failed to get item: ${error.message}`);
-    }
+    const result = await this.dynamoDB.get(params).promise();
+    return result.Item;
   }
 
-  // Método para atualizar um item no DynamoDB
-  async updateItem(cpf: string, updatedData: any) {
-    const params = {
-      TableName: 'Customers',
-      Key: { cpf },  // Chave para identificar o item
-      UpdateExpression: 'set #name = :name, #email = :email',  // Expressão para atualizar atributos
+  // Método para atualizar um item na tabela
+  async updateItem(cpf: string, item: any): Promise<any> {
+    const params: DynamoDB.DocumentClient.UpdateItemInput = {
+      TableName: this.tableName,
+      Key: { cpf },
+      UpdateExpression: "set #name = :name, #email = :email",
       ExpressionAttributeNames: {
-        '#name': 'name',
-        '#email': 'email',
+        "#name": "name",
+        "#email": "email"
       },
       ExpressionAttributeValues: {
-        ':name': updatedData.name,
-        ':email': updatedData.email,
+        ":name": item.name,
+        ":email": item.email
       },
-      ReturnValues: 'ALL_NEW',  // Retorna o item atualizado
+      ReturnValues: "UPDATED_NEW"
     };
 
-    try {
-      const result = await this.db.update(params).promise();
-      return result.Attributes;  // Retorna o item atualizado
-    } catch (error) {
-      throw new Error(`Failed to update item: ${error.message}`);
-    }
+    return this.dynamoDB.update(params).promise();
   }
 }
