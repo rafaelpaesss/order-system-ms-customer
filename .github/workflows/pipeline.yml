@@ -60,15 +60,19 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Running dependencies
+        run: |
+          yarn add aws-sdk
+          yarn add @aws-sdk/client-dynamodb
+          npm install aws-sdk
+          npm install --save-dev @types/swagger-jsdoc @types/swagger-ui-express
+  
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
         run: |
           # Listar conteúdo do diretório para verificar a presença do Dockerfile
           pwd
           ls
-          npm install aws-sdk
-          npm install swagger-ui-express
-          npm install swagger-jsdoc
           
           # Construir a imagem Docker
           docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f dockerfile .
