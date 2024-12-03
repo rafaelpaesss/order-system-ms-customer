@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../src/Application/services/customer.service';
-import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';
-import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';  // Importe o DTO para passar corretamente os dados
+import { CustomerService } from '../../Application/Services/customer.service';  // Ajuste o caminho se necessário
+import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
+import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';  // Importe o DTO
+
+jest.mock('../../Domain/Repositories/customersRepository');  // Mocka o repositório
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: jest.Mocked<CustomersRepository>;
+  let customersRepository: jest.Mocked<CustomersRepository>;  // Assegure-se de que o Jest entenda que é um mock
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,22 +24,22 @@ describe('CustomerService', () => {
     }).compile();
 
     customerService = module.get<CustomerService>(CustomerService);
-    customersRepository = module.get<CustomersRepository>(CustomersRepository);
+    customersRepository = module.get<CustomersRepository>(CustomersRepository);  // Mockado
   });
 
   it('should create a customer', async () => {
-    // Mock para criar o cliente
+    // Mock de resposta para o método 'createCustomer'
     const mockCustomer = {
       cpf: '12345678900',
       name: 'John Doe',
       email: 'johndoe@example.com',
-      password: 'password123',  // Senha incluída para criar o mock completo
+      password: 'password123',
     };
 
-    // Ajuste do mock
+    // Configura o mock para o método 'createCustomer' retornar o mockCustomer
     customersRepository.createCustomer.mockResolvedValue(mockCustomer);
 
-    // Criação do DTO para passar como parâmetro para a função
+    // Criação do DTO para passar ao método
     const createCustomerDto: CreateCustomerDto = {
       cpf: '12345678900',
       name: 'John Doe',
@@ -48,11 +50,11 @@ describe('CustomerService', () => {
     // Chamada do método de criação de cliente
     const response = await customerService.createCustomer(createCustomerDto);
 
-    // Verifica se a resposta é igual ao mock
+    // Verifica se a resposta está correta (sem a senha)
     expect(response).toEqual({
       cpf: '12345678900',
       name: 'John Doe',
       email: 'johndoe@example.com',
-    });  // Não incluir senha na resposta
+    });
   });
 });
