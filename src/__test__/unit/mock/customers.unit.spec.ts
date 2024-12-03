@@ -1,4 +1,4 @@
-import { DynamoDBHealthIndicator } from '@Health/DynamoDbHealthIndicator.service'; // Corrigido o nome do import
+import { DynamoDBHealthIndicator } from '../../../Infrastructure/Apis/DynamoDbHealthIndicator.service'; // Caminho correto
 import { CustomersService } from '@Services/customers.service';
 import { DynamoDBService } from '@Apis/dynamoDB.service';
 import { CustomersRepository } from '@Repositories/customers.repository';
