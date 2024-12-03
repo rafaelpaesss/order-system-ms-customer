@@ -8,7 +8,7 @@ import { bootstrap } from '../src/main';  // Certifique-se de que o bootstrap es
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: CustomersRepository; // Não estamos usando Mocked diretamente aqui
+  let customersRepository: jest.Mocked<CustomersRepository>; // Alteração para Mocked
   let customerData: CreateCustomerDto;
   let app: any;
 
@@ -32,13 +32,8 @@ describe('CustomerService', () => {
         {
           provide: CustomersRepository,
           useValue: {
-            getCustomerByCpf: jest.fn().mockResolvedValue(null), // Mock para getCustomerByCpf
-            createCustomer: jest.fn().mockResolvedValue({
-              cpf: '12345678900',
-              name: 'John Doe',
-              email: 'johndoe@example.com',
-              password: 'password123',
-            }), // Mock para createCustomer
+            getCustomerByCpf: jest.fn(),  // Mock da função getCustomerByCpf
+            createCustomer: jest.fn(),    // Mock da função createCustomer
           },
         },
       ],
@@ -46,6 +41,9 @@ describe('CustomerService', () => {
 
     customerService = module.get<CustomerService>(CustomerService);
     customersRepository = module.get<CustomersRepository>(CustomersRepository);
+
+    // Garantir que customersRepository seja tratado como um mock
+    customersRepository = customersRepository as jest.Mocked<CustomersRepository>;
   });
 
   it('should create a customer', async () => {
