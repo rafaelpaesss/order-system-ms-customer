@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../../Application/services/customer.service';
-import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
-import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';
+import { CustomerService } from '../src/Application/services/customer.service';
+import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';  
+import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';  
 
 jest.mock('../Domain/Repositories/customersRepository');  // Mocka o repositório
 
