@@ -3,7 +3,7 @@ import { CustomerService } from '../Application/services/customer.service';  // 
 import { CustomersRepository } from '../Domain/Repositories/customersRepository';
 import { CreateCustomerDto } from '../Presentation/Customers/dtos/create-customer.dto';  // Importe o DTO
 
-jest.mock('../../Domain/Repositories/customersRepository');  // Mocka o repositório
+jest.mock('../Domain/Repositories/customersRepository');  // Mocka o repositório
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
