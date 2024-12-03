@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../src/Application/services/customer.service';
-import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';
-import { BadRequestError, NotFoundError } from '../src/Domain/Errors';
-import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
-import { CustomerDto } from '../src/Presentation/Customers/dtos/customers.dto';
+import { CustomerService } from '../Application/services/customer.service';
+import { CustomersRepository } from '../Domain/Repositories/customersRepository';
+import { BadRequestError, NotFoundError } from '../Domain/Errors';
+import { CreateCustomerDto } from '../Presentation/Customers/dtos/create-customer.dto';
+import { CustomerDto } from '../Presentation/Customers/dtos/customers.dto';
 
 // Mocka o CustomersRepository
 jest.mock('../src/Domain/Repositories/customersRepository');
