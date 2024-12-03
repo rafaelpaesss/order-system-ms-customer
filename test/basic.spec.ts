@@ -8,12 +8,12 @@ import { bootstrap } from '../src/main';  // Certifique-se de que o bootstrap es
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: jest.Mocked<CustomersRepository>;  // Garantir que seja um mock
+  let customersRepository: CustomersRepository;  // Não precisamos mais de Mocked diretamente aqui
   let customerData: CreateCustomerDto;
   let app: any;
 
   beforeAll(async () => {
-    app = await bootstrap();  // Inicializa o app
+    app = await bootstrap();  // Certifique-se de inicializar o app
   });
 
   beforeEach(() => {
@@ -32,8 +32,13 @@ describe('CustomerService', () => {
         {
           provide: CustomersRepository,
           useValue: {
-            getCustomerByCpf: jest.fn(),  // Mock do método getCustomerByCpf
-            createCustomer: jest.fn(),  // Mock do método createCustomer
+            getCustomerByCpf: jest.fn().mockResolvedValue(null), // Mocka a função getCustomerByCpf
+            createCustomer: jest.fn().mockResolvedValue({
+              cpf: '12345678900',
+              name: 'John Doe',
+              email: 'johndoe@example.com',
+              password: 'password123',
+            }), // Mocka a função createCustomer
           },
         },
       ],
@@ -45,7 +50,7 @@ describe('CustomerService', () => {
 
   it('should create a customer', async () => {
     // Mockando o retorno de getCustomerByCpf e createCustomer
-    customersRepository.getCustomerByCpf.mockResolvedValue(null);  // Nenhum cliente com o CPF
+    customersRepository.getCustomerByCpf.mockResolvedValue(null);
     customersRepository.createCustomer.mockResolvedValue({
       cpf: '12345678900',
       name: 'John Doe',
@@ -63,7 +68,7 @@ describe('CustomerService', () => {
   });
 
   it('should create a customer via HTTP request', async () => {
-    customersRepository.getCustomerByCpf.mockResolvedValue(null);  // Nenhum cliente com o CPF
+    customersRepository.getCustomerByCpf.mockResolvedValue(null);
     customersRepository.createCustomer.mockResolvedValue({
       cpf: '12345678900',
       name: 'John Doe',
@@ -71,6 +76,7 @@ describe('CustomerService', () => {
       password: 'password123',
     });
 
+    // Certifique-se de que customerData está corretamente definido
     const response = await request(app)
       .post('/customers')
       .send(customerData);
