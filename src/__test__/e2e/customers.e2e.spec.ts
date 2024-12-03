@@ -1,60 +1,45 @@
-import { HttpModule } from '@nestjs/axios';
-import { INestApplication } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { CustomersService } from '../../Application/services/customers.service';
-import { CustomersAdapter } from '../../Domain/Adapters/customers.adapter';
-import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
-import { DynamoDBService } from '../../Infrastructure/Apis/dynamoDB.service';
-import { CustomersController } from '../../Presentation/Customers/customers.controller';
-import { HealthController } from '../../Presentation/Health/health.controller';
-import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDBHealthIndicator.service';
+import { CustomersService } from '@Application/services/customers.service';
+import { DynamoDBService } from '@Infrastructure/Apis/dynamoDB.service';
+import { DynamoDBHealthIndicator } from '@Presentation/Health/DynamoDBHealthIndicator.service';
 
-describe('E2E Test Customers', () => {
-  let controller: CustomersController;
-  let healthController: HealthController;
-  let service: CustomersService;
-  let dynamoDB: DynamoDBService;
-  let healthService: DynamoDBHealthIndicator;
-  let app: INestApplication;
+describe('E2E Tests for Customers', () => {
+  let customersService: CustomersService;
+  let dynamoDBService: DynamoDBService;
+  let dynamoDBHealthIndicator: DynamoDBHealthIndicator;
 
-  const mockDynamoDBService = {
-    get: jest.fn(),
-    put: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  };
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [HttpModule],
-      controllers: [CustomersController, HealthController],
-      providers: [
-        DynamoDBHealthIndicator,
-        CustomersService,
-        DynamoDBService,
-        ConfigService,
-        { provide: CustomersRepository, useClass: CustomersAdapter },
-      ],
-    })
-      .overrideProvider(DynamoDBService)
-      .useValue(mockDynamoDBService)
-      .compile();
-
-    controller = module.get<CustomersController>(CustomersController);
-    healthController = module.get<HealthController>(HealthController);
-    service = module.get(CustomersService);
-    healthService = module.get(DynamoDBHealthIndicator);
-    dynamoDB = module.get(DynamoDBService);
-    app = module.createNestApplication();
-    await app.init();
+  beforeEach(() => {
+    dynamoDBService = new DynamoDBService();
+    customersService = new CustomersService(dynamoDBService);
+    dynamoDBHealthIndicator = new DynamoDBHealthIndicator();
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-    expect(service).toBeDefined();
-    expect(dynamoDB).toBeDefined();
-    expect(healthController).toBeDefined();
-    expect(healthService).toBeDefined();
+  it('should fetch a customer by ID', async () => {
+    const id = '123';
+    const customer = await customersService.getById(id);
+    expect(customer).toBeDefined();
+    expect(customer.id).toBe(id);
+  });
+
+  it('should save a new customer', async () => {
+    const newCustomer = { id: '124', name: 'Jane Doe', cpf: '987654321' };
+    const savedCustomer = await customersService.save(newCustomer);
+    expect(savedCustomer).toEqual(newCustomer);
+  });
+
+  it('should update an existing customer', async () => {
+    const id = '123';
+    const updatedCustomer = { id, name: 'John Doe Updated', cpf: '123456789' };
+    const updated = await customersService.update(id, updatedCustomer);
+    expect(updated).toEqual(updatedCustomer);
+  });
+
+  it('should delete a customer', async () => {
+    const id = '123';
+    await expect(customersService.delete(id)).resolves.toBeUndefined();
+  });
+
+  it('should check DynamoDB health status', async () => {
+    const healthStatus = await dynamoDBHealthIndicator.checkHealth();
+    expect(healthStatus.status).toBe('ok');
   });
 });
