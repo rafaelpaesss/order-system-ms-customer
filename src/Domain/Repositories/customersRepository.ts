@@ -1,15 +1,10 @@
-// src/Domain/Repositories/customersRepository.ts
+import { Injectable } from '@nestjs/common';
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';  // Corrigido para o caminho correto
-import { Customer } from '../Interfaces/customer';  // Supondo que você tenha uma interface de Customer
+import { Customer } from '../Interfaces/customer';
 
+@Injectable() 
 export class CustomersRepository {
-  private dynamoDBService: DynamoDBService;
-
-  constructor() {
-    // Inicializa o DynamoDBService com o nome da tabela, que pode ser configurado por variável de ambiente
-    const tableName = process.env.DYNAMODB_TABLE_NAME || 'customers-table';
-    this.dynamoDBService = new DynamoDBService(tableName);
-  }
+  constructor(private readonly dynamoDBService: DynamoDBService) {}  // Injeção do DynamoDBService via constructor
 
   // Método para criar um novo cliente
   async createCustomer(cpf: string, name: string, email: string, password: string): Promise<Customer> {
@@ -17,7 +12,7 @@ export class CustomersRepository {
       cpf,
       name,
       email,
-      password,  // Senha em texto simples (não segura para produção, lembre-se de criptografar)
+      password, 
     };
 
     // Insere o cliente no DynamoDB
