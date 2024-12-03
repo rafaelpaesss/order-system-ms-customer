@@ -42,12 +42,18 @@ describe('CustomerService', () => {
         password: 'password123',
       };
 
-      // Mock do repositório para retornar um cliente criado
+      // Mock para retornar um objeto do tipo Customer
       customersRepository.getCustomerByCpf.mockResolvedValue(null);  // Nenhum cliente com o CPF
-      customersRepository.createCustomer.mockResolvedValue(createCustomerDto as any);  // Simula a criação do cliente
+      customersRepository.createCustomer.mockResolvedValue({
+        cpf: '12345678900',
+        name: 'John Doe',
+        email: 'johndoe@example.com',
+        password: 'password123',  // O password não será retornado no DTO
+      } as any);  // Aqui fazemos o mock de um retorno de tipo `Customer`
 
       const result: CustomerDto = await customerService.createCustomer(createCustomerDto);
 
+      // Verifica se o retorno está correto
       expect(result).toEqual({
         cpf: '12345678900',
         name: 'John Doe',
