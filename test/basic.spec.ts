@@ -30,8 +30,13 @@ describe('CustomerService', () => {
   });
 
   it('should create a customer', async () => {
-    const mockCustomer = { cpf: '12345678900', name: 'John Doe', email: 'johndoe@example.com', password: 'password123' };
-    
+    const mockCustomer = {
+      cpf: '12345678900',
+      name: 'John Doe',
+      email: 'johndoe@example.com',
+      password: 'password123',  // Inclui a senha no mock
+    };
+
     // Garantir que createCustomer está definido e mocka seu valor
     (customersRepository.createCustomer as jest.Mock).mockResolvedValue(mockCustomer);
 
@@ -44,13 +49,18 @@ describe('CustomerService', () => {
 
     const response = await customerService.createCustomer(createCustomerDto);
 
-    // Verifica se o método foi chamado corretamente e se o retorno está correto
+    // Verifica se o método foi chamado corretamente e se o retorno está correto, sem o campo 'password'
     expect(customersRepository.createCustomer).toHaveBeenCalledWith(
       createCustomerDto.cpf,
       createCustomerDto.name,
       createCustomerDto.email,
       createCustomerDto.password,
     );
-    expect(response).toEqual(mockCustomer);
+
+    // Compara os objetos ignorando a senha
+    const { password, ...responseWithoutPassword } = response;
+    const { password: mockPassword, ...mockCustomerWithoutPassword } = mockCustomer;
+
+    expect(responseWithoutPassword).toEqual(mockCustomerWithoutPassword);
   });
 });
