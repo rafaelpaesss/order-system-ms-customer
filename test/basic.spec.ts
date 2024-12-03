@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../src/Application/services/customer.service';
-import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';
-import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
-import { CustomerDto } from '../src/Presentation/Customers/dtos/customers.dto';
+import { CustomerService } from '../../src/Application/services/customer.service';
+import { CustomersRepository } from '../../src/Domain/Repositories/customersRepository';
+import { CreateCustomerDto } from '../../src/Presentation/Customers/dtos/create-customer.dto';
+import { CustomerDto } from '../../src/Presentation/Customers/dtos/customers.dto';
 import request from 'supertest';  // Correção da importação do supertest
-import { bootstrap } from '../src/main';  // Certifique-se de que o bootstrap esteja correto
+import { bootstrap } from '../../src/main';  // Certifique-se de que o bootstrap esteja correto
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
@@ -42,6 +42,7 @@ describe('CustomerService', () => {
     customerService = module.get<CustomerService>(CustomerService);
     customersRepository = module.get<CustomersRepository>(CustomersRepository);
 
+    // Garantir que customersRepository é tratado como um mock
     customersRepository = customersRepository as jest.Mocked<CustomersRepository>;
   });
 
