@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../../Application/Services/customer.service';  // Ajuste o caminho se necessário
+import { CustomerService } from '../../Application/services/customer.service';  // Ajuste o caminho se necessário
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
 import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';  // Importe o DTO
 
@@ -8,24 +8,6 @@ jest.mock('../../Domain/Repositories/customersRepository');  // Mocka o reposit�
 describe('CustomerService', () => {
   let customerService: CustomerService;
   let customersRepository: jest.Mocked<CustomersRepository>;  // Assegure-se de que o Jest entenda que é um mock
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CustomerService,
-        {
-          provide: CustomersRepository,
-          useValue: {
-            createCustomer: jest.fn(),  // Mock da função 'createCustomer'
-            getCustomerByCpf: jest.fn(),  // Mock da função 'getCustomerByCpf'
-          },
-        },
-      ],
-    }).compile();
-
-    customerService = module.get<CustomerService>(CustomerService);
-    customersRepository = module.get<CustomersRepository>(CustomersRepository);  // Mockado
-  });
 
   it('should create a customer', async () => {
     // Mock de resposta para o método 'createCustomer'
