@@ -19,6 +19,6 @@ export class CustomersService {
   }
 
   async delete(id: number): Promise<Customers> {
-    return this.customersRepository.deleteCustomerById(id);
+    return this.customersRepository.deleteCustomerByCpf(id);
   }
 }
