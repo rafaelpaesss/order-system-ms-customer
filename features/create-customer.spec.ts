@@ -4,7 +4,7 @@ import { CustomersRepository } from '../src/Domain/Repositories/customersReposit
 import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
 import { CustomerDto } from '../src/Presentation/Customers/dtos/customers.dto';
 import * as request from 'supertest';  // Adicionando supertest para requisições de teste
-import { app } from '../../src/main';  // Assumindo que você tenha a instância do app em main.ts
+import { app } from '../src/__test__/mock/main';
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
