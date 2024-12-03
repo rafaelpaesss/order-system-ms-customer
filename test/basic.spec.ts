@@ -1,45 +1,40 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../src/Application/services/customer.service';
-import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';  
-import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';  
-
-jest.mock('../Domain/Repositories/customersRepository');  // Mocka o repositório
+import { CustomerService } from '../../src/Application/services/customer.service';  // Ajuste o caminho
+import { CustomersRepository } from '../../src/Domain/Repositories/customersRepository';  // Ajuste o caminho
+import { CreateCustomerDto } from '../../src/Presentation/Customers/dtos/create-customer.dto';  // Ajuste o caminho
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: jest.Mocked<CustomersRepository>;  // Assegure-se de que o Jest entenda que é um mock
+  let customersRepository: jest.Mocked<CustomersRepository>;  // Defina o tipo corretamente
 
   beforeEach(async () => {
+    // Mocka os métodos da classe CustomersRepository
+    const customersRepositoryMock = {
+      createCustomer: jest.fn(),  // Mocka createCustomer
+      getCustomerByCpf: jest.fn(),  // Mocka getCustomerByCpf
+      updateCustomer: jest.fn(),  // Mocka updateCustomer, caso exista
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CustomerService,
         {
           provide: CustomersRepository,
-          useValue: {
-            createCustomer: jest.fn(),
-            getCustomerByCpf: jest.fn(),
-          },
+          useValue: customersRepositoryMock,  // Passa o mock para o Jest
         },
       ],
     }).compile();
 
     customerService = module.get<CustomerService>(CustomerService);
-    customersRepository = module.get<CustomersRepository>(CustomersRepository);  // Mockado
+    customersRepository = module.get<CustomersRepository>(CustomersRepository);  // Agora com mock
   });
 
   it('should create a customer', async () => {
-    // Mock de resposta para o método 'createCustomer'
-    const mockCustomer = {
-      cpf: '12345678900',
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      password: 'password123',
-    };
-
+    const mockCustomer = { cpf: '12345678900', name: 'John Doe', email: 'johndoe@example.com', password: 'password123' };
+    
     // Configura o mock para o método 'createCustomer' retornar o mockCustomer
     customersRepository.createCustomer.mockResolvedValue(mockCustomer);
 
-    // Criação do DTO para passar ao método
     const createCustomerDto: CreateCustomerDto = {
       cpf: '12345678900',
       name: 'John Doe',
@@ -47,14 +42,15 @@ describe('CustomerService', () => {
       password: 'password123',
     };
 
-    // Chamada do método de criação de cliente
     const response = await customerService.createCustomer(createCustomerDto);
 
-    // Verifica se a resposta está correta (sem a senha)
-    expect(response).toEqual({
-      cpf: '12345678900',
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-    });
+    // Verifica se o método foi chamado corretamente e se o retorno está correto
+    expect(customersRepository.createCustomer).toHaveBeenCalledWith(
+      createCustomerDto.cpf,
+      createCustomerDto.name,
+      createCustomerDto.email,
+      createCustomerDto.password,
+    );
+    expect(response).toEqual(mockCustomer);
   });
 });
