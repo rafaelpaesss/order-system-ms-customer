@@ -3,8 +3,8 @@ import { CustomerService } from '../src/Application/services/customer.service';
 import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';
 import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
 import { CustomerDto } from '../src/Presentation/Customers/dtos/customers.dto';
-import request from 'supertest';  // Correção: Importação padrão do supertest
-import { bootstrap } from '../src/main';  // Importe o bootstrap ou a instância do app
+import request from 'supertest';  // Corrigindo a importação do supertest
+import { bootstrap } from '../src/main';  // Certifique-se de que o bootstrap esteja correto
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
@@ -13,8 +13,7 @@ describe('CustomerService', () => {
   let app: any;
 
   beforeAll(async () => {
-    // Inicia o app antes de rodar os testes
-    app = await bootstrap();  // Ou a função que inicializa a instância do app
+    app = await bootstrap();  // Inicializa a aplicação
   });
 
   beforeEach(() => {
@@ -43,11 +42,13 @@ describe('CustomerService', () => {
     customerService = module.get<CustomerService>(CustomerService);
     customersRepository = module.get<CustomersRepository>(CustomersRepository);
 
+    // Defina explicitamente o tipo de customersRepository
     customersRepository = customersRepository as jest.Mocked<CustomersRepository>;
   });
 
   it('should create a customer', async () => {
-    customersRepository.getCustomerByCpf.mockResolvedValue(null);
+    // Mockando o retorno de getCustomerByCpf e createCustomer
+    customersRepository.getCustomerByCpf.mockResolvedValue(null);  // Nenhum cliente com o CPF
     customersRepository.createCustomer.mockResolvedValue({
       cpf: '12345678900',
       name: 'John Doe',
@@ -65,7 +66,7 @@ describe('CustomerService', () => {
   });
 
   it('should create a customer via HTTP request', async () => {
-    customersRepository.getCustomerByCpf.mockResolvedValue(null);
+    customersRepository.getCustomerByCpf.mockResolvedValue(null);  // Nenhum cliente com o CPF
     customersRepository.createCustomer.mockResolvedValue({
       cpf: '12345678900',
       name: 'John Doe',
@@ -73,8 +74,7 @@ describe('CustomerService', () => {
       password: 'password123',
     });
 
-    // Certifique-se de que customerData está corretamente definido
-    const response = await request(app)  // Use a instância do app
+    const response = await request(app)
       .post('/customers')
       .send(customerData);
 
