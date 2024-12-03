@@ -13,9 +13,9 @@
     "paths": {
       "@src/*": ["src/*"],
       "@Apis/*": ["Infrastructure/Apis/*"],
-      "@Services/*": ["Application/services/*"],
+      "@Services/*": ["Application/services/*"],  // Alias corrigido para o diretório correto
       "@Health/*": ["Presentation/Health/*"],
-      "@Customers/*": ["Presentation/Customers/*"]  // Alias para Customers
+      "@Customers/*": ["Presentation/Customers/*"]
     },
     "resolveJsonModule": true,
     "noImplicitAny": true,
