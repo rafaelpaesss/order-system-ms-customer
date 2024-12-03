@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../src/Application/services/customer.service';  // Ajuste o caminho
-import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';  // Ajuste o caminho
-import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';  // Ajuste o caminho
+import { CustomerService } from '../src/Application/services/customer.service';  // Ajuste o caminho conforme necessário
+import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';  // Ajuste o caminho conforme necessário
+import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';  // Ajuste o caminho conforme necessário
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: jest.Mocked<CustomersRepository>;  // Defina o tipo corretamente
+  let customersRepository: Partial<CustomersRepository>;  // Ajuste o tipo para Partial
 
   beforeEach(async () => {
     // Mocka os métodos da classe CustomersRepository
