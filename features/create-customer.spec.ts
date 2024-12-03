@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../../src/Application/services/customer.service';
-import { CustomersRepository } from '../../src/Domain/Repositories/customersRepository';
-import { CreateCustomerDto } from '../../src/Presentation/Customers/dtos/create-customer.dto';
-import { CustomerDto } from '../../src/Presentation/Customers/dtos/customers.dto';
+import { CustomerService } from '../src/Application/services/customer.service';
+import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';
+import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
+import { CustomerDto } from '../src/Presentation/Customers/dtos/customers.dto';
 import request from 'supertest';  // Correção: Importação padrão do supertest
-import { bootstrap } from '../../src/main';  // Importe o bootstrap ou a instância do app
+import { bootstrap } from '../src/__test__/mock/main';  // Importe o bootstrap ou a instância do app
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
