@@ -3,17 +3,17 @@ import { CustomerService } from '../src/Application/services/customer.service';
 import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';
 import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
 import { CustomerDto } from '../src/Presentation/Customers/dtos/customers.dto';
-import request from 'supertest';  // Corrigindo a importação do supertest
+import request from 'supertest';  // Correção da importação do supertest
 import { bootstrap } from '../src/main';  // Certifique-se de que o bootstrap esteja correto
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: jest.Mocked<CustomersRepository>;
+  let customersRepository: jest.Mocked<CustomersRepository>;  // Garantir que seja um mock
   let customerData: CreateCustomerDto;
   let app: any;
 
   beforeAll(async () => {
-    app = await bootstrap();  // Inicializa a aplicação
+    app = await bootstrap();  // Inicializa o app
   });
 
   beforeEach(() => {
@@ -32,8 +32,8 @@ describe('CustomerService', () => {
         {
           provide: CustomersRepository,
           useValue: {
-            getCustomerByCpf: jest.fn(),
-            createCustomer: jest.fn(),
+            getCustomerByCpf: jest.fn(),  // Mock do método getCustomerByCpf
+            createCustomer: jest.fn(),  // Mock do método createCustomer
           },
         },
       ],
@@ -41,9 +41,6 @@ describe('CustomerService', () => {
 
     customerService = module.get<CustomerService>(CustomerService);
     customersRepository = module.get<CustomersRepository>(CustomersRepository);
-
-    // Defina explicitamente o tipo de customersRepository
-    customersRepository = customersRepository as jest.Mocked<CustomersRepository>;
   });
 
   it('should create a customer', async () => {
