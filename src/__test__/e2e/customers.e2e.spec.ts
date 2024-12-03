@@ -1,6 +1,6 @@
-import { CustomersService } from '../../../Application/services/customers.service';
-import { DynamoDBService } from '../../../Infrastructure/Apis/dynamoDB.service';
-import { DynamoDBHealthIndicator } from '../../../Presentation/Health/DynamoDBHealthIndicator.service';
+import { DynamoDBService } from '@Apis/dynamoDB.service';
+import { CustomersService } from '@Services/customers.service';
+import { DynamoDBHealthIndicator } from '@Health/DynamoDBHealthIndicator.service';
 
 describe('E2E Tests for Customers', () => {
   let customersService: CustomersService;
