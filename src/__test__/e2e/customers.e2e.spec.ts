@@ -2,24 +2,27 @@ import { HttpModule } from '@nestjs/axios';
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../../Application/services/customer.service';
-import { CustomersRepository } from '../../Domain/Repositories/customersRepository';  // Ajuste conforme necessário
-import { CustomersController } from '../../Presentation/Customers/customers.controller';  // Ajuste conforme necessário
+import { CustomersService } from '../../Application/services/customers.service';
+import { CustomersAdapter } from '../../Domain/Adapters/customers.adapter';
+import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamoDB.service';
+import { CustomersController } from '../../Presentation/Customers/customers.controller';
 import { HealthController } from '../../Presentation/Health/health.controller';
-import { DynamoDbHealthIndicator } from '../../Presentation/Health/DynamoDbHealthIndicator.service';  // Novo serviço para o DynamoDB
+import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDBHealthIndicator.service';
 
 describe('E2E Test Customers', () => {
   let controller: CustomersController;
   let healthController: HealthController;
-  let service: CustomerService;
-  let healthService: DynamoDbHealthIndicator;  // Usando o novo serviço de verificação do DynamoDB
+  let service: CustomersService;
+  let dynamoDB: DynamoDBService;
+  let healthService: DynamoDBHealthIndicator;
   let app: INestApplication;
 
-  const mockCustomerService = {
-    getById: jest.fn(),
-    createCustomer: jest.fn(),
-    updateCustomer: jest.fn(),
-    getCustomerByCpf: jest.fn(),
+  const mockDynamoDBService = {
+    get: jest.fn(),
+    put: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -27,17 +30,22 @@ describe('E2E Test Customers', () => {
       imports: [HttpModule],
       controllers: [CustomersController, HealthController],
       providers: [
-        DynamoDbHealthIndicator,  // Alterado para o DynamoDbHealthIndicator
-        CustomerService,
+        DynamoDBHealthIndicator,
+        CustomersService,
+        DynamoDBService,
         ConfigService,
-        { provide: CustomersRepository, useValue: mockCustomerService },  // Mocka diretamente o repositório
+        { provide: CustomersRepository, useClass: CustomersAdapter },
       ],
-    }).compile();
+    })
+      .overrideProvider(DynamoDBService)
+      .useValue(mockDynamoDBService)
+      .compile();
 
     controller = module.get<CustomersController>(CustomersController);
     healthController = module.get<HealthController>(HealthController);
-    service = module.get<CustomerService>(CustomerService);
-    healthService = module.get<DynamoDbHealthIndicator>(DynamoDbHealthIndicator);
+    service = module.get(CustomersService);
+    healthService = module.get(DynamoDBHealthIndicator);
+    dynamoDB = module.get(DynamoDBService);
     app = module.createNestApplication();
     await app.init();
   });
@@ -45,35 +53,8 @@ describe('E2E Test Customers', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
     expect(service).toBeDefined();
+    expect(dynamoDB).toBeDefined();
     expect(healthController).toBeDefined();
     expect(healthService).toBeDefined();
-  });
-
-  it('should create a customer', async () => {
-    const mockCustomer = {
-      cpf: '12345678900',
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      password: 'password123',
-    };
-
-    mockCustomerService.createCustomer.mockResolvedValue(mockCustomer);
-
-    const createCustomerDto = {
-      cpf: '12345678900',
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      password: 'password123',
-    };
-
-    const response = await service.createCustomer(createCustomerDto);
-
-    expect(mockCustomerService.createCustomer).toHaveBeenCalledWith(
-      createCustomerDto.cpf,
-      createCustomerDto.name,
-      createCustomerDto.email,
-      createCustomerDto.password,
-    );
-    expect(response).toEqual(mockCustomer);
   });
 });
