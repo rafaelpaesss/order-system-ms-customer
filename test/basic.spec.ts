@@ -32,8 +32,8 @@ describe('CustomerService', () => {
   it('should create a customer', async () => {
     const mockCustomer = { cpf: '12345678900', name: 'John Doe', email: 'johndoe@example.com', password: 'password123' };
     
-    // Configura o mock para o método 'createCustomer' retornar o mockCustomer
-    customersRepository.createCustomer.mockResolvedValue(mockCustomer);
+    // Garantir que createCustomer está definido e mocka seu valor
+    (customersRepository.createCustomer as jest.Mock).mockResolvedValue(mockCustomer);
 
     const createCustomerDto: CreateCustomerDto = {
       cpf: '12345678900',
