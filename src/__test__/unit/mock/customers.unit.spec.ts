@@ -1,76 +1,103 @@
-import { Customers } from '../../Domain/Interfaces/customers';
-import { prismaMock } from '../singleton';
-import {
-  deleteCustomerById,
-  getCustomerById,
-  saveCustomer,
-  updateCustomer,
-} from './mock/functionsCustomers';
+import { DynamoDBClient, GetItemCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
+import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
 
-describe('Unit Test Customers', () => {
-  it('should Create new customer', async () => {
-    const dto: Customers = { name: 'John Doe', email: 'johndoe@example.com' };
+const dynamoDbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-    const results = {
-      id: 1,
-      createdAt: new Date('2024-10-29T14:01:25.029Z'),
-      updatedAt: new Date('2024-10-29T14:01:25.029Z'),
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-    };
+const tableName = process.env.DYNAMODB_TABLE_NAME || 'customers';
 
-    prismaMock.customers.create.mockResolvedValue(results);
+// Método para obter um cliente por ID
+export async function getCustomerById(id: string) {
+  try {
+    const command = new GetItemCommand({
+      TableName: tableName,
+      Key: marshall({ id }),
+    });
+    const { Item } = await dynamoDbClient.send(command);
+    return Item ? unmarshall(Item) : null;
+  } catch (error) {
+    throw new Error(`Error fetching customer with ID ${id}: ${error.message}`);
+  }
+}
 
-    await expect(saveCustomer(dto)).resolves.toEqual(results);
-  });
+// Método para salvar um novo cliente
+export async function saveCustomer(customer: Record<string, any>) {
+  try {
+    const command = new PutItemCommand({
+      TableName: tableName,
+      Item: marshall(customer),
+    });
+    await dynamoDbClient.send(command);
+    return customer;
+  } catch (error) {
+    throw new Error(`Error saving customer: ${error.message}`);
+  }
+}
 
-  it('should Update customer', async () => {
-    const dto: Customers = {
-      id: 1,
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-    };
+// Método para atualizar um cliente existente
+export async function updateCustomer(id: string, updates: Record<string, any>) {
+  try {
+    const updateExpressions = [];
+    const expressionAttributeValues = {};
+    const expressionAttributeNames = {};
 
-    const results = {
-      id: 1,
-      createdAt: new Date('2024-10-29T14:01:25.029Z'),
-      updatedAt: new Date('2024-10-29T14:01:25.029Z'),
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-    };
+    for (const [key, value] of Object.entries(updates)) {
+      const attributeName = `#${key}`;
+      const attributeValue = `:${key}`;
+      updateExpressions.push(`${attributeName} = ${attributeValue}`);
+      expressionAttributeValues[attributeValue] = value;
+      expressionAttributeNames[attributeName] = key;
+    }
 
-    prismaMock.customers.update.mockResolvedValue(results);
+    const command = new UpdateItemCommand({
+      TableName: tableName,
+      Key: marshall({ id }),
+      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+      ExpressionAttributeValues: marshall(expressionAttributeValues),
+      ExpressionAttributeNames: expressionAttributeNames,
+      ReturnValues: 'ALL_NEW',
+    });
 
-    await expect(updateCustomer(dto)).resolves.toEqual(results);
-  });
+    const { Attributes } = await dynamoDbClient.send(command);
+    return Attributes ? unmarshall(Attributes) : null;
+  } catch (error) {
+    throw new Error(`Error updating customer with ID ${id}: ${error.message}`);
+  }
+}
 
-  it('should Get customer by ID', async () => {
-    const id = 1;
-    const results = {
-      id: 1,
-      createdAt: new Date('2024-10-29T14:01:25.029Z'),
-      updatedAt: new Date('2024-10-29T14:01:25.029Z'),
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-    };
+// Método para deletar um cliente por ID
+export async function deleteCustomerById(id: string) {
+  try {
+    const command = new DeleteItemCommand({
+      TableName: tableName,
+      Key: marshall({ id }),
+      ReturnValues: 'ALL_OLD',
+    });
 
-    prismaMock.customers.findUnique.mockResolvedValue(results);
+    const { Attributes } = await dynamoDbClient.send(command);
+    return Attributes ? unmarshall(Attributes) : null;
+  } catch (error) {
+    throw new Error(`Error deleting customer with ID ${id}: ${error.message}`);
+  }
+}
 
-    await expect(getCustomerById(id)).resolves.toEqual(results);
-  });
+// Método para buscar clientes por algum atributo (exemplo: CPF)
+export async function getCustomersByAttribute(attribute: string, value: string) {
+  try {
+    const command = new QueryCommand({
+      TableName: tableName,
+      IndexName: `${attribute}-index`, // Certifique-se de ter um índice global secundário configurado
+      KeyConditionExpression: `#${attribute} = :${attribute}`,
+      ExpressionAttributeNames: {
+        [`#${attribute}`]: attribute,
+      },
+      ExpressionAttributeValues: marshall({
+        [`:${attribute}`]: value,
+      }),
+    });
 
-  it('should Delete customer by ID', async () => {
-    const id = 1;
-    const results = {
-      id: 1,
-      createdAt: new Date('2024-10-29T14:01:25.029Z'),
-      updatedAt: new Date('2024-10-29T14:01:25.029Z'),
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-    };
-
-    prismaMock.customers.delete.mockResolvedValue(results);
-
-    await expect(deleteCustomerById(id)).resolves.toEqual(results);
-  });
-});
+    const { Items } = await dynamoDbClient.send(command);
+    return Items ? Items.map((item) => unmarshall(item)) : [];
+  } catch (error) {
+    throw new Error(`Error querying customers by ${attribute}: ${error.message}`);
+  }
+}
