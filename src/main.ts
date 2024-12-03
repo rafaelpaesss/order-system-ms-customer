@@ -6,5 +6,5 @@ async function bootstrap() {
   await app.listen(3000);
 }
 
-// Exporte o app apenas para testes
+// Inicializa o aplicativo e exporta para testes
 export const app = bootstrap();
