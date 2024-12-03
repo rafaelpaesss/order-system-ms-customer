@@ -8,7 +8,7 @@ import { bootstrap } from '../src/main';  // Certifique-se de que o bootstrap es
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: jest.Mocked<CustomersRepository>; // Alteração para Mocked
+  let customersRepository: CustomersRepository;
   let customerData: CreateCustomerDto;
   let app: any;
 
@@ -32,8 +32,9 @@ describe('CustomerService', () => {
         {
           provide: CustomersRepository,
           useValue: {
-            getCustomerByCpf: jest.fn(),  // Mock da função getCustomerByCpf
-            createCustomer: jest.fn(),    // Mock da função createCustomer
+            // Mockando diretamente os métodos da classe
+            getCustomerByCpf: jest.fn(),
+            createCustomer: jest.fn(),
           },
         },
       ],
@@ -41,15 +42,12 @@ describe('CustomerService', () => {
 
     customerService = module.get<CustomerService>(CustomerService);
     customersRepository = module.get<CustomersRepository>(CustomersRepository);
-
-    // Garantir que customersRepository seja tratado como um mock
-    customersRepository = customersRepository as jest.Mocked<CustomersRepository>;
   });
 
   it('should create a customer', async () => {
     // Mockando o retorno de getCustomerByCpf e createCustomer
-    customersRepository.getCustomerByCpf.mockResolvedValue(null);
-    customersRepository.createCustomer.mockResolvedValue({
+    (customersRepository.getCustomerByCpf as jest.Mock).mockResolvedValue(null);
+    (customersRepository.createCustomer as jest.Mock).mockResolvedValue({
       cpf: '12345678900',
       name: 'John Doe',
       email: 'johndoe@example.com',
@@ -66,8 +64,8 @@ describe('CustomerService', () => {
   });
 
   it('should create a customer via HTTP request', async () => {
-    customersRepository.getCustomerByCpf.mockResolvedValue(null);
-    customersRepository.createCustomer.mockResolvedValue({
+    (customersRepository.getCustomerByCpf as jest.Mock).mockResolvedValue(null);
+    (customersRepository.createCustomer as jest.Mock).mockResolvedValue({
       cpf: '12345678900',
       name: 'John Doe',
       email: 'johndoe@example.com',
