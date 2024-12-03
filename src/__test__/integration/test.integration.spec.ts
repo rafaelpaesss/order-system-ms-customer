@@ -1,27 +1,29 @@
+import { HttpModule } from '@nestjs/axios';
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { DynamoDBModule } from 'nestjs-dynamo';
-import { CustomersService } from '../../Application/services/customers.service';
-import { CustomersController } from '../../Presentation/Customers/customers.controller';
-import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
-import { CustomersAdapter } from '../../Domain/Adapters/customers.adapter';
-import { Customer } from '../../Domain/Interfaces/customers.interface';
 import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamoDB.service';
+import { CustomersService } from '../../Application/services/customers.service';
+import { CustomersAdapter } from '../../Domain/Adapters/customers.adapter';
+import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
+import { CustomersController } from '../../Presentation/Customers/customers.controller';
+import { HealthController } from '../../Presentation/Health/health.controller';
+import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDBHealthIndicator.service';
 import request from 'supertest';
-import { DynamoDBService } from '../../Infrastructure/Dynamo/dynamodb.service'; // exemplo de serviço DynamoDB
 
 let app: INestApplication;
 let controllerCustomers: CustomersController;
 
 beforeAll(async () => {
   const module: TestingModule = await Test.createTestingModule({
-    imports: [DynamoDBModule],  // Certifique-se de importar seu módulo do DynamoDB
-    controllers: [CustomersController],
+    imports: [HttpModule],
+    controllers: [CustomersController, HealthController],
     providers: [
+      DynamoDBHealthIndicator,
       CustomersService,
-      { provide: CustomersRepository, useClass: CustomersAdapter },
       DynamoDBService,
       ConfigService,
+      { provide: CustomersRepository, useClass: CustomersAdapter },
     ],
   }).compile();
 
@@ -34,82 +36,98 @@ afterAll(async () => {
   await app.close();
 });
 
-beforeEach(async () => {
-  // Resetando o banco de dados DynamoDB antes de cada teste
-  await DynamoDBService.resetTable('Customers'); // Supondo que você tenha um método para limpar dados da tabela
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 describe('Integration Test Customers', () => {
-  it('should create customer', async () => {
-    const dto: Customer = {
-      id: '1', // Considerando que o ID seja uma string no DynamoDB
+  it('should create a customer', async () => {
+    const customer = {
+      cpf: '12345678900',
       name: 'John Doe',
-      email: 'johndoe@example.com',
-    };
-
-    await request(app.getHttpServer()).post('/customers').send(dto).expect(201);
-
-    const customerDb = await controllerCustomers.getByID('1');
-
-    expect(customerDb).toBeTruthy();
-    expect(customerDb?.name).toBe(dto.name);
-    expect(customerDb?.email).toBe(dto.email);
-  });
-
-  it('should update customer', async () => {
-    const dto: Customer = {
-      id: '1',
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-    };
-
-    await request(app.getHttpServer()).post('/customers').send(dto).expect(201);
-
-    const updatedCustomer: Customer = {
-      id: '1',
-      name: 'John Smith',
-      email: 'johnsmith@example.com',
+      password: 'password123',
     };
 
     await request(app.getHttpServer())
-      .patch('/customers')
+      .post('/customers')
+      .send(customer)
+      .expect(201);
+
+    const customerDb = await controllerCustomers.getByCpf(customer.cpf);
+
+    expect(customerDb).toBeTruthy();
+    expect(customerDb?.cpf).toBe(customer.cpf);
+    expect(customerDb?.name).toBe(customer.name);
+  });
+
+  it('should get a customer by CPF', async () => {
+    const customer = {
+      cpf: '12345678900',
+      name: 'John Doe',
+      password: 'password123',
+    };
+
+    await request(app.getHttpServer())
+      .post('/customers')
+      .send(customer)
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get(`/customers/${customer.cpf}`)
+      .expect(200);
+
+    const customerDb = await controllerCustomers.getByCpf(customer.cpf);
+
+    expect(customerDb).toBeTruthy();
+    expect(customerDb?.cpf).toBe(customer.cpf);
+  });
+
+  it('should update a customer', async () => {
+    const customer = {
+      cpf: '12345678900',
+      name: 'John Doe',
+      password: 'password123',
+    };
+
+    await request(app.getHttpServer())
+      .post('/customers')
+      .send(customer)
+      .expect(201);
+
+    const updatedCustomer = {
+      cpf: '12345678900',
+      name: 'John Smith',
+      password: 'newpassword123',
+    };
+
+    await request(app.getHttpServer())
+      .patch(`/customers/${customer.cpf}`)
       .send(updatedCustomer)
       .expect(200);
 
-    const customerDb = await controllerCustomers.getByID('1');
+    const customerDb = await controllerCustomers.getByCpf(customer.cpf);
 
     expect(customerDb).toBeTruthy();
     expect(customerDb?.name).toBe(updatedCustomer.name);
-    expect(customerDb?.email).toBe(updatedCustomer.email);
   });
 
-  it('should get customer by id', async () => {
-    const dto: Customer = {
-      id: '1',
+  it('should delete a customer by CPF', async () => {
+    const customer = {
+      cpf: '12345678900',
       name: 'John Doe',
-      email: 'johndoe@example.com',
+      password: 'password123',
     };
 
-    await request(app.getHttpServer()).post('/customers').send(dto).expect(201);
+    await request(app.getHttpServer())
+      .post('/customers')
+      .send(customer)
+      .expect(201);
 
-    const customerDb = await controllerCustomers.getByID('1');
+    await request(app.getHttpServer())
+      .delete(`/customers/${customer.cpf}`)
+      .expect(200);
 
-    expect(customerDb).toBeTruthy();
-    expect(customerDb?.name).toBe(dto.name);
-  });
-
-  it('should delete customer by ID', async () => {
-    const dto: Customer = {
-      id: '1',
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-    };
-
-    await request(app.getHttpServer()).post('/customers').send(dto).expect(201);
-
-    await request(app.getHttpServer()).delete('/customers/1').expect(200);
-
-    const customerDb = await controllerCustomers.getByID('1');
+    const customerDb = await controllerCustomers.getByCpf(customer.cpf);
 
     expect(customerDb).toBeNull();
   });
