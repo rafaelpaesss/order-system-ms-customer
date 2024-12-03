@@ -6,7 +6,7 @@ metadata:
   labels:
     app: order-system-customers
 spec:
-  replicas: 3 # Define a quantidade de réplicas para alta disponibilidade
+  replicas: 3
   selector:
     matchLabels:
       app: order-system-customers
@@ -22,9 +22,9 @@ spec:
             - containerPort: 3000
           envFrom:
             - configMapRef:
-                name: api-configmap
+                name: customer-api-configmap
             - secretRef:
-                name: api-secrets
+                name: customer-api-secrets
           resources:
             limits:
               memory: "256Mi"
