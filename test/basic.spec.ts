@@ -5,28 +5,26 @@ import { BadRequestError, NotFoundError } from '../src/Domain/Errors';
 import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
 import { CustomerDto } from '../src/Presentation/Customers/dtos/customers.dto';
 
+// Mocka o CustomersRepository
+jest.mock('../src/Domain/Repositories/customersRepository');
+
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: CustomersRepository;
+  let customersRepository: jest.Mocked<CustomersRepository>;
 
   beforeEach(async () => {
-    const customersRepositoryMock = {
-      getCustomerByCpf: jest.fn(),
-      createCustomer: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CustomerService,
         {
           provide: CustomersRepository,
-          useValue: customersRepositoryMock,
+          useValue: new CustomersRepository(),  // Mocka a classe diretamente
         },
       ],
     }).compile();
 
     customerService = module.get<CustomerService>(CustomerService);
-    customersRepository = module.get<CustomersRepository>(CustomersRepository);
+    customersRepository = module.get<CustomersRepository>(CustomersRepository);  // Aqui estamos pegando a instância do mock
   });
 
   it('should be defined', () => {
