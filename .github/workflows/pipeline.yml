@@ -26,6 +26,7 @@ jobs:
           npm install jest-cucumber
           yarn add aws-sdk
           yarn add @aws-sdk/client-dynamodb
+          npm install nestjs-dynamo
 
       - name: Set up Docker
         run: |
