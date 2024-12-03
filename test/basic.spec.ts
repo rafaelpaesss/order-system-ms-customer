@@ -8,12 +8,12 @@ import { bootstrap } from '../src/main';  // Certifique-se de que o bootstrap es
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: jest.Mocked<CustomersRepository>;  // Aqui vamos tipar corretamente o mock
+  let customersRepository: CustomersRepository; // Não estamos usando Mocked diretamente aqui
   let customerData: CreateCustomerDto;
   let app: any;
 
   beforeAll(async () => {
-    app = await bootstrap();  // Certifique-se de inicializar o app
+    app = await bootstrap();  // Inicializando o app
   });
 
   beforeEach(() => {
@@ -32,8 +32,13 @@ describe('CustomerService', () => {
         {
           provide: CustomersRepository,
           useValue: {
-            getCustomerByCpf: jest.fn() as jest.MockedFunction<typeof customersRepository.getCustomerByCpf>,  // Usando MockedFunction aqui
-            createCustomer: jest.fn() as jest.MockedFunction<typeof customersRepository.createCustomer>,  // Usando MockedFunction para criar mock correto
+            getCustomerByCpf: jest.fn().mockResolvedValue(null), // Mock para getCustomerByCpf
+            createCustomer: jest.fn().mockResolvedValue({
+              cpf: '12345678900',
+              name: 'John Doe',
+              email: 'johndoe@example.com',
+              password: 'password123',
+            }), // Mock para createCustomer
           },
         },
       ],
@@ -71,7 +76,6 @@ describe('CustomerService', () => {
       password: 'password123',
     });
 
-    // Certifique-se de que customerData está corretamente definido
     const response = await request(app)
       .post('/customers')
       .send(customerData);
