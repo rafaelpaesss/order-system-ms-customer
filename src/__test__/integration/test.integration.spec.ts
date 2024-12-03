@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersController } from '../../../Presentation/Customers/customers.controller'; // Corrigido o caminho do controller
-import { CustomersService } from '../../../Application/services/customers.service'; // Corrigido o caminho do serviço
-import { DynamoDBService } from '../../../Infrastructure/Apis/dynamoDB.service'; // Corrigido o caminho do DynamoDBService
-import { DynamoDBHealthIndicator } from '../../../Presentation/Health/DynamoDBHealthIndicator.service'; // Corrigido o caminho do Health Indicator
+import { DynamoDBService } from '@Apis/dynamoDB.service';
+import { CustomersService } from '@Services/customers.service';
+import { DynamoDBHealthIndicator } from '@Health/DynamoDBHealthIndicator.service';
 
 describe('CustomersController', () => {
   let controllerCustomers: CustomersController;
