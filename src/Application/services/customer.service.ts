@@ -1,15 +1,13 @@
+import { Injectable } from '@nestjs/common';  // Adicionando o decorador Injectable
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
 import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';
 import { CustomerDto } from '../../Presentation/Customers/dtos/customers.dto';
 import { Customer } from '../../Domain/Interfaces/customer';
 import { BadRequestError, NotFoundError } from '../../Domain/Errors';
 
+@Injectable()  // Decorador para injeção de dependência
 export class CustomerService {
-  private customersRepository: CustomersRepository;
-
-  constructor() {
-    this.customersRepository = new CustomersRepository();
-  }
+  constructor(private readonly customersRepository: CustomersRepository) {}  // Injeção do repositório no construtor
 
   async createCustomer(createCustomerDto: CreateCustomerDto): Promise<CustomerDto> {
     const { cpf, name, email, password } = createCustomerDto;
