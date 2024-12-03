@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../../src/Application/services/customer.service';
-import { CustomersRepository } from '../../src/Domain/Repositories/customersRepository';
-import { CreateCustomerDto } from '../../src/Presentation/Customers/dtos/create-customer.dto';
-import { CustomerDto } from '../../src/Presentation/Customers/dtos/customers.dto';
+import { CustomerService } from '../../Application/services/customer.service';
+import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
+import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';
+import { CustomerDto } from '../../Presentation/Customers/dtos/customers.dto';
 import * as request from 'supertest';  // Adicionando supertest para requisições de teste
 import { app } from '../../src/main';  // Assumindo que você tenha a instância do app em main.ts
 
