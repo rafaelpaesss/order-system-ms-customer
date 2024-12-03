@@ -1,36 +1,36 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomersController } from '../src/Presentation/Customers/customers.controller';
 import { CustomerService } from '../src/Application/services/customer.service';
+import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';
+import { BadRequestError, NotFoundError } from '../src/Domain/Errors';
 import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';
+import { CustomerDto } from '../src/Presentation/Customers/dtos/customers.dto';
 
-// Mock do CustomersRepository
-class MockCustomerService {
-  createCustomer(createCustomerDto: CreateCustomerDto) {
-    return { ...createCustomerDto }; // Simula a criação do cliente
-  }
-}
-
-describe('CustomersController', () => {
-  let controller: CustomersController;
-  let service: CustomerService;
+describe('CustomerService', () => {
+  let customerService: CustomerService;
+  let customersRepository: CustomersRepository;
 
   beforeEach(async () => {
+    const customersRepositoryMock = {
+      getCustomerByCpf: jest.fn(),
+      createCustomer: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [CustomersController],
       providers: [
+        CustomerService,
         {
-          provide: CustomerService,
-          useClass: MockCustomerService, // Substitui o serviço real pelo mock
+          provide: CustomersRepository,
+          useValue: customersRepositoryMock,
         },
       ],
     }).compile();
 
-    controller = module.get<CustomersController>(CustomersController);
-    service = module.get<CustomerService>(CustomerService);
+    customerService = module.get<CustomerService>(CustomerService);
+    customersRepository = module.get<CustomersRepository>(CustomersRepository);
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(customerService).toBeDefined();
   });
 
   describe('createCustomer', () => {
@@ -42,16 +42,33 @@ describe('CustomersController', () => {
         password: 'password123',
       };
 
-      const mockCustomerResponse = { ...createCustomerDto }; // Mocka a resposta esperada
+      // Mock do repositório para retornar um cliente criado
+      customersRepository.getCustomerByCpf.mockResolvedValue(null);  // Nenhum cliente com o CPF
+      customersRepository.createCustomer.mockResolvedValue(createCustomerDto as any);  // Simula a criação do cliente
 
-      // Chama o método do controlador
-      const response = await controller.createCustomer(createCustomerDto);
+      const result: CustomerDto = await customerService.createCustomer(createCustomerDto);
 
-      // Verifica se a resposta do controlador é a esperada
-      expect(response).toEqual(mockCustomerResponse);
+      expect(result).toEqual({
+        cpf: '12345678900',
+        name: 'John Doe',
+        email: 'johndoe@example.com',
+      });
+    });
 
-      // Verifica se o serviço foi chamado com os parâmetros corretos
-      expect(service.createCustomer).toHaveBeenCalledWith(createCustomerDto);
+    it('should throw BadRequestError if the customer already exists', async () => {
+      const createCustomerDto: CreateCustomerDto = {
+        cpf: '12345678900',
+        name: 'John Doe',
+        email: 'johndoe@example.com',
+        password: 'password123',
+      };
+
+      // Mock do repositório para retornar um cliente já existente
+      customersRepository.getCustomerByCpf.mockResolvedValue(createCustomerDto as any);
+
+      await expect(customerService.createCustomer(createCustomerDto)).rejects.toThrowError(
+        new BadRequestError('Customer already exists'),
+      );
     });
   });
 });
