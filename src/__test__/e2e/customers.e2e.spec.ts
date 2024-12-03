@@ -1,5 +1,5 @@
 import { DynamoDBService } from '@Apis/dynamodb.service';
-import { CustomersService } from '@Services/customers.service';
+import { CustomersService } from '@Services/customer.service';
 import { DynamoDBHealthIndicator } from '@Health/DynamoDBHealthIndicator.service';
 
 describe('E2E Tests for Customers', () => {
