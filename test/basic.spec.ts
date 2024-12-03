@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../../src/Application/services/customer.service';  // Ajuste o caminho
-import { CustomersRepository } from '../../src/Domain/Repositories/customersRepository';  // Ajuste o caminho
-import { CreateCustomerDto } from '../../src/Presentation/Customers/dtos/create-customer.dto';  // Ajuste o caminho
+import { CustomerService } from '../src/Application/services/customer.service';  // Ajuste o caminho
+import { CustomersRepository } from '../src/Domain/Repositories/customersRepository';  // Ajuste o caminho
+import { CreateCustomerDto } from '../src/Presentation/Customers/dtos/create-customer.dto';  // Ajuste o caminho
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
