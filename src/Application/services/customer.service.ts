@@ -6,8 +6,8 @@ import { CustomersRepository } from '../../Domain/Repositories/customersReposito
 export class CustomersService {
   constructor(private readonly customersRepository: CustomersRepository) {}
 
-  async getById(id: number): Promise<Customers | null> {
-    return this.customersRepository.getCustomerById(id);
+  async getByCpf(id: number): Promise<Customers | null> {
+    return this.customersRepository.getCustomerByCpf(id);
   }
 
   async create(customers: Customers): Promise<Customers> {
