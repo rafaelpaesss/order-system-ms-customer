@@ -1,6 +1,7 @@
-Feature: create Product
-  Creating the Product
+Feature: Create Customer
 
-  Scenario: create Product
-    When creating a product
-    Then return product made
+Scenario: Successfully creating a new customer
+  Given I have a valid customer data
+  When I send a request to create a customer
+  Then the customer should be created successfully
+  And the response status code should be 201
