@@ -1,103 +1,119 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamoDB.service';
+import { CustomersService } from '../../Application/services/customers.service';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
+import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDBHealthIndicator.service';
 
-const dynamoDbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
+describe('CustomersService', () => {
+  let dynamoDBService: DynamoDBService;
+  let customersService: CustomersService;
+  let dynamoDBHealthIndicator: DynamoDBHealthIndicator;
 
-const tableName = process.env.DYNAMODB_TABLE_NAME || 'customers';
+  beforeEach(() => {
+    dynamoDBService = new DynamoDBService();
+    customersService = new CustomersService(dynamoDBService);
+    dynamoDBHealthIndicator = new DynamoDBHealthIndicator();
+  });
 
-// Método para obter um cliente por ID
-export async function getCustomerById(id: string) {
-  try {
-    const command = new GetItemCommand({
-      TableName: tableName,
-      Key: marshall({ id }),
-    });
-    const { Item } = await dynamoDbClient.send(command);
-    return Item ? unmarshall(Item) : null;
-  } catch (error) {
-    throw new Error(`Error fetching customer with ID ${id}: ${error.message}`);
-  }
-}
+  it('should fetch customer by id', async () => {
+    const id = '123';
+    const expectedCustomer = { id, name: 'John Doe', cpf: '123456789' };
 
-// Método para salvar um novo cliente
-export async function saveCustomer(customer: Record<string, any>) {
-  try {
-    const command = new PutItemCommand({
-      TableName: tableName,
-      Item: marshall(customer),
-    });
-    await dynamoDbClient.send(command);
-    return customer;
-  } catch (error) {
-    throw new Error(`Error saving customer: ${error.message}`);
-  }
-}
+    // Mocking the DynamoDB Service to simulate fetching a customer
+    const customerData = marshall(expectedCustomer);
+    jest.spyOn(dynamoDBService, 'get').mockResolvedValueOnce(customerData);
 
-// Método para atualizar um cliente existente
-export async function updateCustomer(id: string, updates: Record<string, any>) {
-  try {
-    const updateExpressions = [];
-    const expressionAttributeValues = {};
-    const expressionAttributeNames = {};
+    const customer = await customersService.getById(id);
 
-    for (const [key, value] of Object.entries(updates)) {
-      const attributeName = `#${key}`;
-      const attributeValue = `:${key}`;
-      updateExpressions.push(`${attributeName} = ${attributeValue}`);
-      expressionAttributeValues[attributeValue] = value;
-      expressionAttributeNames[attributeName] = key;
+    expect(customer).toEqual(expectedCustomer);
+  });
+
+  it('should save a new customer', async () => {
+    const newCustomer = { id: '124', name: 'Jane Doe', cpf: '987654321' };
+
+    const customerData = marshall(newCustomer);
+
+    jest.spyOn(dynamoDBService, 'put').mockResolvedValueOnce(customerData);
+
+    const savedCustomer = await customersService.save(newCustomer);
+
+    expect(savedCustomer).toEqual(newCustomer);
+  });
+
+  it('should update an existing customer', async () => {
+    const id = '123';
+    const updatedCustomer = { id, name: 'John Doe Updated', cpf: '123456789' };
+
+    const customerData = marshall(updatedCustomer);
+
+    jest.spyOn(dynamoDBService, 'update').mockResolvedValueOnce(customerData);
+
+    const updated = await customersService.update(id, updatedCustomer);
+
+    expect(updated).toEqual(updatedCustomer);
+  });
+
+  it('should delete a customer', async () => {
+    const id = '123';
+
+    jest.spyOn(dynamoDBService, 'delete').mockResolvedValueOnce(null);
+
+    await expect(customersService.delete(id)).resolves.toBeUndefined();
+  });
+
+  it('should handle errors while fetching customer', async () => {
+    const id = '123';
+
+    jest.spyOn(dynamoDBService, 'get').mockRejectedValueOnce(new Error('Error fetching customer'));
+
+    try {
+      await customersService.getById(id);
+    } catch (error: any) {
+      expect(error.message).toBe('Error fetching customer with ID 123: Error fetching customer');
     }
+  });
 
-    const command = new UpdateItemCommand({
-      TableName: tableName,
-      Key: marshall({ id }),
-      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-      ExpressionAttributeValues: marshall(expressionAttributeValues),
-      ExpressionAttributeNames: expressionAttributeNames,
-      ReturnValues: 'ALL_NEW',
-    });
+  it('should handle errors while saving customer', async () => {
+    const newCustomer = { id: '125', name: 'New User', cpf: '456789123' };
 
-    const { Attributes } = await dynamoDbClient.send(command);
-    return Attributes ? unmarshall(Attributes) : null;
-  } catch (error) {
-    throw new Error(`Error updating customer with ID ${id}: ${error.message}`);
-  }
-}
+    jest.spyOn(dynamoDBService, 'put').mockRejectedValueOnce(new Error('Error saving customer'));
 
-// Método para deletar um cliente por ID
-export async function deleteCustomerById(id: string) {
-  try {
-    const command = new DeleteItemCommand({
-      TableName: tableName,
-      Key: marshall({ id }),
-      ReturnValues: 'ALL_OLD',
-    });
+    try {
+      await customersService.save(newCustomer);
+    } catch (error: any) {
+      expect(error.message).toBe('Error saving customer: Error saving customer');
+    }
+  });
 
-    const { Attributes } = await dynamoDbClient.send(command);
-    return Attributes ? unmarshall(Attributes) : null;
-  } catch (error) {
-    throw new Error(`Error deleting customer with ID ${id}: ${error.message}`);
-  }
-}
+  it('should handle errors while updating customer', async () => {
+    const id = '123';
+    const updatedCustomer = { id, name: 'Updated User', cpf: '987654321' };
 
-// Método para buscar clientes por algum atributo (exemplo: CPF)
-export async function getCustomersByAttribute(attribute: string, value: string) {
-  try {
-    const command = new QueryCommand({
-      TableName: tableName,
-      IndexName: `${attribute}-index`, // Certifique-se de ter um índice global secundário configurado
-      KeyConditionExpression: `#${attribute} = :${attribute}`,
-      ExpressionAttributeNames: {
-        [`#${attribute}`]: attribute,
-      },
-      ExpressionAttributeValues: marshall({
-        [`:${attribute}`]: value,
-      }),
-    });
+    jest.spyOn(dynamoDBService, 'update').mockRejectedValueOnce(new Error('Error updating customer'));
 
-    const { Items } = await dynamoDbClient.send(command);
-    return Items ? Items.map((item) => unmarshall(item)) : [];
-  } catch (error) {
-    throw new Error(`Error querying customers by ${attribute}: ${error.message}`);
-  }
-}
+    try {
+      await customersService.update(id, updatedCustomer);
+    } catch (error: any) {
+      expect(error.message).toBe('Error updating customer with ID 123: Error updating customer');
+    }
+  });
+
+  it('should handle errors while deleting customer', async () => {
+    const id = '123';
+
+    jest.spyOn(dynamoDBService, 'delete').mockRejectedValueOnce(new Error('Error deleting customer'));
+
+    try {
+      await customersService.delete(id);
+    } catch (error: any) {
+      expect(error.message).toBe('Error deleting customer with ID 123: Error deleting customer');
+    }
+  });
+
+  it('should handle DynamoDB health check', async () => {
+    jest.spyOn(dynamoDBHealthIndicator, 'checkHealth').mockResolvedValueOnce({ status: 'ok' });
+
+    const healthStatus = await dynamoDBHealthIndicator.checkHealth();
+
+    expect(healthStatus).toEqual({ status: 'ok' });
+  });
+});
