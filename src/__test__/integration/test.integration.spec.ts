@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersController } from '@Customers/customers.controller';
-import { DynamoDBService } from '@Apis/dynamoDB.service';
+import { DynamoDBService } from '@Apis/dynamodb.service';
 import { CustomersService } from '@Services/customers.service';
 import { DynamoDBHealthIndicator } from '@Health/DynamoDBHealthIndicator.service';
 
