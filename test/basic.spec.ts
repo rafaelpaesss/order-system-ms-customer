@@ -8,7 +8,7 @@ import { bootstrap } from '../src/main';  // Certifique-se de que o bootstrap es
 
 describe('CustomerService', () => {
   let customerService: CustomerService;
-  let customersRepository: CustomersRepository;  // Não precisamos mais de Mocked diretamente aqui
+  let customersRepository: jest.Mocked<CustomersRepository>;  // Aqui vamos tipar corretamente o mock
   let customerData: CreateCustomerDto;
   let app: any;
 
@@ -32,13 +32,8 @@ describe('CustomerService', () => {
         {
           provide: CustomersRepository,
           useValue: {
-            getCustomerByCpf: jest.fn().mockResolvedValue(null), // Mocka a função getCustomerByCpf
-            createCustomer: jest.fn().mockResolvedValue({
-              cpf: '12345678900',
-              name: 'John Doe',
-              email: 'johndoe@example.com',
-              password: 'password123',
-            }), // Mocka a função createCustomer
+            getCustomerByCpf: jest.fn() as jest.MockedFunction<typeof customersRepository.getCustomerByCpf>,  // Usando MockedFunction aqui
+            createCustomer: jest.fn() as jest.MockedFunction<typeof customersRepository.createCustomer>,  // Usando MockedFunction para criar mock correto
           },
         },
       ],
