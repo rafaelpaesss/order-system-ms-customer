@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { CustomerModule } from './customer/customer.module'; // Importando CustomerModule
+import { CustomersModule } from '../src/Presentation/Customers/customers.module'; // Importando CustomerModule
 
 @Module({
-  imports: [CustomerModule],
+  imports: [CustomersModule],
   controllers: [],
   providers: [],
 })
