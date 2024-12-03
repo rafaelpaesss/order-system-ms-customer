@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
-import { CustomersController } from './Presentation/Customers/customers.controller';
-import { CustomerService } from './Application/services/customer.service';
-import { DynamoDBService } from './Infrastructure/Apis/dynamodb.service';
+import { CustomerModule } from './customer/customer.module'; // Importando CustomerModule
 
 @Module({
-  imports: [],
-  controllers: [CustomersController],
-  providers: [CustomerService, DynamoDBService],
+  imports: [CustomerModule],  // Certifique-se de que CustomerModule foi importado
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
