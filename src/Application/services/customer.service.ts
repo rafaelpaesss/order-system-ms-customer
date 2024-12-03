@@ -1,24 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import { Customers } from '../../Domain/Interfaces/customers';
-import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
+import { CustomersRepository } from '@Repositories/customers.repository';
 
-@Injectable()
 export class CustomersService {
   constructor(private readonly customersRepository: CustomersRepository) {}
 
-  async getByCpf(id: number): Promise<Customers | null> {
-    return this.customersRepository.getCustomerByCpf(id);
+  async getById(id: number): Promise<Customer | null> {
+    return this.customersRepository.getCustomerById(id);
   }
 
-  async create(customers: Customers): Promise<Customers> {
-    return this.customersRepository.saveCustomer(customers);
+  async save(customer: Customer): Promise<Customer> {
+    return this.customersRepository.saveCustomer(customer);
   }
 
-  async update(customers: Customers): Promise<Customers> {
-    return this.customersRepository.updateCustomer(customers);
+  async update(id: number, updatedCustomer: Customer): Promise<Customer> {
+    return this.customersRepository.updateCustomer(id, updatedCustomer);
   }
 
-  async delete(id: number): Promise<Customers> {
-    return this.customersRepository.deleteCustomerByCpf(id);
+  async delete(id: number): Promise<void> {
+    return this.customersRepository.deleteCustomerById(id);
   }
 }
