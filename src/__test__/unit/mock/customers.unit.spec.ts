@@ -1,7 +1,7 @@
-import { DynamoDBService } from '../../Infrastructure/Apis/dynamoDB.service';
-import { CustomersService } from '../../Application/services/customers.service';
+import { DynamoDBService } from '../../../Infrastructure/Apis/dynamoDB.service';
+import { CustomersService } from '../../../Application/services/customers.service';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
-import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDBHealthIndicator.service';
+import { DynamoDBHealthIndicator } from '../../../Presentation/Health/DynamoDBHealthIndicator.service';
 
 describe('CustomersService', () => {
   let dynamoDBService: DynamoDBService;
