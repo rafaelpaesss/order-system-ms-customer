@@ -1,6 +1,6 @@
 // src/__tests__/customer.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomerService } from '../../Application/Services/customer.service';
+import { CustomerService } from '../../Application/services/customer.service';
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { CreateCustomerDto } from '../../Presentation/Customers/dtos/create-customer.dto';
