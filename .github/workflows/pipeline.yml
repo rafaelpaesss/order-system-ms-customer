@@ -25,6 +25,7 @@ jobs:
         run: |
           yarn add aws-sdk
           yarn add @aws-sdk/client-dynamodb
+          npm install @aws-sdk/util-dynamodb
 
       - name: Set up Docker
         run: |
