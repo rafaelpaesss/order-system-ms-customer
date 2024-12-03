@@ -1,61 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
-import { Customer } from '../../Domain/Interfaces/customer';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { DynamoDBClient, GetItemCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 
 @Injectable()
-export class DynamoDBService {
+export class DynamoDBService implements OnModuleInit, OnModuleDestroy {
   private client: DynamoDBClient;
+  private docClient: DynamoDBDocumentClient;
 
-  constructor() {
-    // Configuração do DynamoDBClient
-    this.client = new DynamoDBClient({
-      region: 'us-east-1',  // Altere para a região desejada
-    });
+  async onModuleInit() {
+    this.client = new DynamoDBClient({});
+    this.docClient = DynamoDBDocumentClient.from(this.client);
   }
 
-  // Método para obter um cliente por CPF
-  async getCustomerByCpf(cpf: string): Promise<Customer | null> {
-    const command = new GetItemCommand({
-      TableName: 'Customers', // Nome da sua tabela no DynamoDB
-      Key: {
-        cpf: { S: cpf },
-      },
-    });
-
-    try {
-      const data = await this.client.send(command);
-      if (!data.Item) return null;
-      
-      return {
-        cpf: data.Item.cpf.S,
-        name: data.Item.name.S,
-        email: data.Item.email.S,
-        password: data.Item.password.S,
-      };
-    } catch (error) {
-      throw new Error('Error fetching customer');
+  async onModuleDestroy() {
+    if (this.client) {
+      this.client.destroy();
     }
   }
 
-  // Método para criar um novo cliente
-  async createCustomer(customer: Customer): Promise<Customer> {
-    const command = new PutItemCommand({
-      TableName: 'Customers', // Nome da sua tabela no DynamoDB
-      Item: {
-        cpf: { S: customer.cpf },
-        name: { S: customer.name },
-        email: { S: customer.email },
-        password: { S: customer.password },
-      },
-    });
-
-    try {
-      await this.client.send(command);
-      return customer;
-    } catch (error) {
-      throw new Error('Error creating customer');
-    }
+  async get(params: GetCommand['input']) {
+    return this.docClient.send(new GetCommand(params));
   }
 
-  // Outros métodos como update, delete, etc. podem ser adicionados aqui conforme necessário
+  async put(params: PutCommand['input']) {
+    return this.docClient.send(new PutCommand(params));
+  }
+
+  async update(params: UpdateCommand['input']) {
+    return this.docClient.send(new UpdateCommand(params));
+  }
+
+  async delete(params: DeleteCommand['input']) {
+    return this.docClient.send(new DeleteCommand(params));
+  }
 }
