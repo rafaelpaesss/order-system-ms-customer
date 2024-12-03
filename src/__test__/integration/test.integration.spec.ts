@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomersController } from '../../../Presentation/Customers/customers.controller'; // Corrigido o caminho do controller
+import { CustomersController } from '@Customers/customers.controller';
 import { DynamoDBService } from '@Apis/dynamoDB.service';
 import { CustomersService } from '@Services/customers.service';
 import { DynamoDBHealthIndicator } from '@Health/DynamoDBHealthIndicator.service';
