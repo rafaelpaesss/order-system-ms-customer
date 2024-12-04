@@ -3,7 +3,7 @@ import { CustomersController } from '../../Presentation/Customers/customers.cont
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { CustomersService } from '../../Application/services/customer.service';
 import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDbHealthIndicator.service';
-import { Customer } from '../../Domain/Interfaces/customer';  // Certifique-se de que esse caminho está correto
+import { Customer } from '../../Domain/Interfaces/customer';
 
 describe('CustomersController', () => {
   let controllerCustomers: CustomersController;
@@ -23,7 +23,7 @@ describe('CustomersController', () => {
 
   it('should return a customer by CPF', async () => {
     const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john.doe@example.com' }; // Simulando um CPF válido
-    jest.spyOn(customersService, 'getCustomerByCpf').mockResolvedValue(customer); // mock do método getCustomerByCpf
+    jest.spyOn(customersService, 'getByCpf').mockResolvedValue(customer); // mock do método getByCpf
 
     const result = await controllerCustomers.getCustomerByCpf(customer.cpf);
     expect(result).toEqual(customer); // Verifica se o retorno é o esperado
@@ -50,9 +50,9 @@ describe('CustomersController', () => {
   it('should delete a customer by CPF', async () => {
     const customer: Customer = { cpf: '12345678900', name: 'Jane Doe', email: 'jane.doe@example.com' };
 
-    jest.spyOn(customersService, 'deleteCustomerByCpf').mockResolvedValue(customer); // mock do método deleteCustomerByCpf
+    jest.spyOn(customersService, 'deleteCustomer').mockResolvedValue(customer); // mock do método deleteCustomer
 
-    const result = await controllerCustomers.deleteCustomerByCpf(customer.cpf);
+    const result = await controllerCustomers.deleteCustomer(customer.cpf);
     expect(result).toEqual(customer); // Verifica se o cliente foi deletado corretamente
   });
 
