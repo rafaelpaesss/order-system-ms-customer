@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { Customer } from '../Interfaces/customer';
 import { CustomersRepository } from '../Repositories/customersRepository';
+import { ReturnValue } from '@aws-sdk/client-dynamodb'; // Importe o tipo ReturnValue
 
 @Injectable()
 export class CustomersAdapter implements CustomersRepository {
@@ -57,7 +58,7 @@ export class CustomersAdapter implements CustomersRepository {
           ':name': { S: customer.name },
           ':email': { S: customer.email },
         },
-        ReturnValues: 'ALL_NEW', // Modificado para ReturnValue adequado
+        ReturnValues: ReturnValue.ALL_NEW,
       };
       const result = await this.dynamoDBService.update(params);
       return result.Attributes as Customer;
@@ -76,7 +77,7 @@ export class CustomersAdapter implements CustomersRepository {
         Key: {
           cpf: { S: cpf },
         },
-        ReturnValues: 'ALL_OLD',
+        ReturnValues: ReturnValue.ALL_OLD,
       };
       const result = await this.dynamoDBService.delete(params);
       return result.Attributes ? (result.Attributes as Customer) : null;
