@@ -10,11 +10,15 @@ spec:
   selector:
     app: order-system-customers
   ports:
-    - name: http-port
+    - name:
       protocol: TCP
       port: 80
       targetPort: 3000
-    - name: https-port
+    - name:
       protocol: TCP
       port: 443
       targetPort: 3001
+    - name:
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
