@@ -6,7 +6,7 @@ import {
   Param, 
   NotFoundException, 
   ConflictException 
-} from '@nestjs/common'; // Certifique-se de que o NestJS está configurado corretamente
+} from '@nestjs/common'; 
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
 import { Customer } from '../../Domain/Interfaces/customer';
@@ -31,14 +31,16 @@ export class CustomersController {
       throw new ConflictException('Customer with this CPF already exists');
     }
 
-    // Cria o cliente
-    const customer: Customer = await this.customersRepository.createCustomer(
+    // Cria o cliente usando o método saveCustomer
+    const newCustomer: Customer = {
       cpf,
       name,
       email,
       password,
-    );
-    return customer;
+    };
+
+    // Agora utilizando saveCustomer ao invés de createCustomer
+    return await this.customersRepository.saveCustomer(newCustomer);
   }
 
   /**
