@@ -20,11 +20,19 @@ export class DynamoDbHealthIndicator {
         status: 'ok',
         message: 'DynamoDB is healthy and responsive.',
       };
-    } catch (error) {
-      return {
-        status: 'error',
-        message: `DynamoDB health check failed: ${error.message}`,
-      };
+    } catch (error: unknown) {
+      // Verificação de tipo
+      if (error instanceof Error) {
+        return {
+          status: 'error',
+          message: `DynamoDB health check failed: ${error.message}`,
+        };
+      } else {
+        return {
+          status: 'error',
+          message: 'DynamoDB health check failed: Unknown error',
+        };
+      }
     }
   }
 }
