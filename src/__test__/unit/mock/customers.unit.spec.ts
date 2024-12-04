@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersService } from '../../../Application/services/customer.service';
-import { DynamoDBService } from '../../../Infrastructure/dynamodb.service';
+import { DynamoDBService } from '../../../Infrastructure/Apis/dynamodb.service';
 import { Customer } from '../../../Domain/Interfaces/customer';
 
 describe('CustomersService', () => {
