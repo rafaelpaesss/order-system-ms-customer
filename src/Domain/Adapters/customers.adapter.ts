@@ -57,7 +57,7 @@ export class CustomersAdapter implements CustomersRepository {
           ':name': { S: customer.name },
           ':email': { S: customer.email },
         },
-        ReturnValues: 'ALL_NEW',
+        ReturnValues: 'ALL_NEW', // Modificado para ReturnValue adequado
       };
       const result = await this.dynamoDBService.update(params);
       return result.Attributes as Customer;
