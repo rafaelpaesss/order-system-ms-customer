@@ -2,9 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersController } from '../../Presentation/Customers/customers.controller';
 import { CustomersService } from '../../Application/services/customer.service';
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
-import { DynamoDBHealthIndicator } from '../../Presentation/health/DynamoDbHealthIndicator.service';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 
 describe('CustomersController (e2e)', () => {
   let app: INestApplication;
@@ -13,7 +12,7 @@ describe('CustomersController (e2e)', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CustomersController],
-      providers: [CustomersService, DynamoDBService, DynamoDBHealthIndicator],
+      providers: [CustomersService, DynamoDBService],
     }).compile();
 
     app = module.createNestApplication();
@@ -23,7 +22,7 @@ describe('CustomersController (e2e)', () => {
   });
 
   it('/customers (GET) - should return a customer by CPF', async () => {
-    const customer = { cpf: '12345678900', name: 'John Doe' };
+    const customer = { cpf: '12345678900', name: 'John Doe', email: 'john.doe@example.com' };
 
     jest.spyOn(customersService, 'getByCpf').mockResolvedValue(customer);
 
@@ -36,9 +35,9 @@ describe('CustomersController (e2e)', () => {
   });
 
   it('/customers (POST) - should create a new customer', async () => {
-    const customer = { cpf: '12345678901', name: 'Jane Doe' };
+    const customer = { cpf: '12345678901', name: 'Jane Doe', email: 'jane.doe@example.com' };
 
-    jest.spyOn(customersService, 'create').mockResolvedValue(customer);
+    jest.spyOn(customersService, 'saveCustomer').mockResolvedValue(customer);
 
     const response = await request(app.getHttpServer())
       .post('/customers')
@@ -49,9 +48,9 @@ describe('CustomersController (e2e)', () => {
   });
 
   it('/customers (PUT) - should update an existing customer', async () => {
-    const customer = { cpf: '12345678900', name: 'John Doe Updated' };
+    const customer = { cpf: '12345678900', name: 'John Doe Updated', email: 'john.doe.updated@example.com' };
 
-    jest.spyOn(customersService, 'update').mockResolvedValue(customer);
+    jest.spyOn(customersService, 'updateCustomer').mockResolvedValue(customer);
 
     const response = await request(app.getHttpServer())
       .put('/customers')
@@ -63,9 +62,9 @@ describe('CustomersController (e2e)', () => {
 
   it('/customers (DELETE) - should delete a customer by CPF', async () => {
     const cpf = '12345678900';
-    const customer = { cpf, name: 'John Doe' };
+    const customer = { cpf, name: 'John Doe', email: 'john.doe@example.com' };
 
-    jest.spyOn(customersService, 'delete').mockResolvedValue(customer);
+    jest.spyOn(customersService, 'deleteCustomer').mockResolvedValue(customer);
 
     const response = await request(app.getHttpServer())
       .delete('/customers')
