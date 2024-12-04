@@ -11,7 +11,7 @@ export class DynamoDbHealthIndicator {
    * Verifica a saúde do DynamoDB, executando uma operação simples como um health check
    * @returns A Promise que resolve para um objeto indicando se o DynamoDB está saudável ou não
    */
-  public async checkHealth(): Promise<{ status: string, message: string }> {
+  public async checkHealth(): Promise<{ status: string; message: string }> {
     try {
       // Tentamos uma operação simples para verificar se o DynamoDB está funcionando
       await this.dynamoDB.listTables().promise();
@@ -21,10 +21,17 @@ export class DynamoDbHealthIndicator {
         message: 'DynamoDB is healthy and responsive.',
       };
     } catch (error) {
-      return {
-        status: 'error',
-        message: `DynamoDB health check failed: ${error.message}`,
-      };
+      if (error instanceof Error) {
+        return {
+          status: 'error',
+          message: `DynamoDB health check failed: ${error.message}`,
+        };
+      } else {
+        return {
+          status: 'error',
+          message: 'DynamoDB health check failed: Unknown error',
+        };
+      }
     }
   }
 }
