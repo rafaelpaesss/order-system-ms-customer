@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomersController } from '../../Presentation/Customers/customers.controller';
-import { CustomersService } from '../../Application/services/customer.service';
-import { CreateCustomerDto } from '../../Domain/Interfaces/create-customer.dto';
-import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
+import { CustomersController } from '../../../Presentation/Customers/customers.controller';
+import { CustomersService } from '../../../Application/services/customer.service';
+import { CreateCustomerDto } from '../../../Presentation/Customers/dtos/create-customer.dto';
+import { CustomersRepository } from '../../../Domain/Repositories/customersRepository';
 
 // Mock da implementação do CustomersRepository
 class MockCustomersRepository {
