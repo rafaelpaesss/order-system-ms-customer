@@ -9,7 +9,7 @@ on:
 
 jobs:
   sonarcloud:
-    name: SonarQube Cloud (Mocked)
+    name: SonarQube Cloud
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
