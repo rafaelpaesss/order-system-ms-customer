@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersController } from '../../Presentation/Customers/customers.controller';
 import { CustomersService } from '../../Application/services/customer.service';
-import { Customer } from '../../Domain/Interfaces/customer';
+import { CreateCustomerDto } from '../../Domain/Interfaces/create-customer.dto';
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
 
 // Mock da implementação do CustomersRepository
@@ -10,8 +10,8 @@ class MockCustomersRepository {
     return Promise.resolve(null); // Mock: sempre retorna null para não encontrar cliente
   }
 
-  saveCustomer(customer: Customer): Promise<Customer> {
-    return Promise.resolve(customer); // Mock: retorna o próprio cliente
+  saveCustomer(customer: CreateCustomerDto): Promise<Customer> {
+    return Promise.resolve({ ...customer, cpf: customer.cpf }); // Mock: retorna o próprio cliente com o CPF
   }
 }
 
@@ -33,7 +33,7 @@ describe('CustomersController', () => {
   });
 
   it('should return a customer by CPF', async () => {
-    const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john.doe@example.com', password: 'securepassword' };
+    const customer: CreateCustomerDto = new CreateCustomerDto('12345678900', 'John Doe', 'john.doe@example.com', 'securepassword');
     jest.spyOn(customersRepository, 'getCustomerByCpf').mockResolvedValue(customer);
 
     const result = await controllerCustomers.getCustomer(customer.cpf); 
@@ -41,7 +41,7 @@ describe('CustomersController', () => {
   });
 
   it('should save a new customer', async () => {
-    const customer: Customer = { cpf: '12345678900', name: 'Jane Doe', email: 'jane.doe@example.com', password: 'securepassword' };
+    const customer: CreateCustomerDto = new CreateCustomerDto('12345678900', 'Jane Doe', 'jane.doe@example.com', 'securepassword');
 
     jest.spyOn(customersRepository, 'getCustomerByCpf').mockResolvedValue(null);  // Mocking that the customer doesn't exist
     jest.spyOn(customersRepository, 'saveCustomer').mockResolvedValue(customer);  // Mock saveCustomer
@@ -51,8 +51,8 @@ describe('CustomersController', () => {
   });
 
   it('should update an existing customer', async () => {
-    const customer: Customer = { cpf: '12345678900', name: 'Jane Doe', email: 'jane.doe@example.com', password: 'securepassword' };
-    const updatedCustomer: Customer = { cpf: '12345678900', name: 'Jane Smith', email: 'jane.smith@example.com', password: 'newpassword' };
+    const customer: CreateCustomerDto = new CreateCustomerDto('12345678900', 'Jane Doe', 'jane.doe@example.com', 'securepassword');
+    const updatedCustomer: CreateCustomerDto = new CreateCustomerDto('12345678900', 'Jane Smith', 'jane.smith@example.com', 'newpassword');
 
     jest.spyOn(customersRepository, 'getCustomerByCpf').mockResolvedValue(customer);
     jest.spyOn(customersRepository, 'saveCustomer').mockResolvedValue(updatedCustomer); // Mock saveCustomer as update
