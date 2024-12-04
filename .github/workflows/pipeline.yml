@@ -68,6 +68,7 @@ jobs:
           npm install @nestjs/core
           npm install aws-sdk
           npm install --save-dev @types/swagger-jsdoc @types/swagger-ui-express
+          npm install @aws-sdk/lib-dynamodb @aws-sdk/client-dynamodb
   
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
