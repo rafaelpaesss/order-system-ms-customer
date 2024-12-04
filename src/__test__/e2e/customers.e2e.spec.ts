@@ -6,6 +6,25 @@ import { CustomersRepository } from '../../Domain/Repositories/customersReposito
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
+// Mock do CustomersRepository para os testes e2e
+class MockCustomersRepository {
+  async getCustomerByCpf(cpf: string) {
+    return { cpf, name: 'John Doe', email: 'john.doe@example.com' };  // Mock de cliente
+  }
+
+  async saveCustomer(customer: any) {
+    return customer;  // Retorna o próprio cliente
+  }
+
+  async updateCustomer(customer: any) {
+    return customer;  // Retorna o cliente atualizado
+  }
+
+  async deleteCustomer(cpf: string) {
+    return { cpf, name: 'John Doe', email: 'john.doe@example.com' };  // Retorna o cliente deletado
+  }
+}
+
 describe('CustomersController (e2e)', () => {
   let app: INestApplication;
   let customersService: CustomersService;
@@ -13,7 +32,11 @@ describe('CustomersController (e2e)', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CustomersController],
-      providers: [CustomersService, DynamoDBService],
+      providers: [
+        CustomersService,
+        DynamoDBService,
+        { provide: CustomersRepository, useClass: MockCustomersRepository }, // Mock do repositório
+      ],
     }).compile();
 
     app = module.createNestApplication();
