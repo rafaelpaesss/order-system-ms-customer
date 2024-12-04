@@ -26,7 +26,7 @@ jobs:
           yarn add aws-sdk
           yarn add @aws-sdk/client-dynamodb
           npm install @aws-sdk/util-dynamodb
-          npm install @aws-sdk/lib-dynamodb @aws-sdk/client-dynamodb
+          npm install @aws-sdk/lib-dynamodb
 
       - name: Set up Docker
         run: |
@@ -36,14 +36,15 @@ jobs:
       - name: Test and coverage
         run: yarn test:cov
 
-      # Mock SonarQube analysis step
-      - name: Mock SonarQube Cloud Scan (success)
-        run: |
-          exit 0
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy:
     runs-on: ubuntu-latest
-    needs: sonarcloud
+    #needs: [sonarcloud]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,7 +69,6 @@ jobs:
           npm install @nestjs/core
           npm install aws-sdk
           npm install --save-dev @types/swagger-jsdoc @types/swagger-ui-express
-          npm install @aws-sdk/lib-dynamodb @aws-sdk/client-dynamodb
   
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
@@ -81,7 +81,6 @@ jobs:
           docker build -t 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest -f dockerfile .
           # Push da imagem para o ECR
           docker push 672970943008.dkr.ecr.us-east-1.amazonaws.com/order-system/customers:latest
-
       - name: Deploy Aws EKS
         if: steps.build-image.outcome != 'failure'
         env:
