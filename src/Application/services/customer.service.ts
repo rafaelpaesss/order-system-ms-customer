@@ -57,7 +57,7 @@ export class CustomersService {
         ':name': { S: customer.name },
         ':email': { S: customer.email },
       },
-      ReturnValues: ReturnValue.ALL_NEW, // Agora usando o tipo correto
+      ReturnValues: ReturnValue.ALL_NEW, // Usando o valor correto para ReturnValues
     };
 
     const result = await this.dynamoDBService.update(params);
