@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersController } from '../../Presentation/Customers/customers.controller';
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { CustomersService } from '../../Application/services/customer.service';
-import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDBHealthIndicator.service';
+import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDbHealthIndicator.service';
 import { Customer } from '../../Domain/Interfaces/customer';  // Certifique-se de que esse caminho está correto
 
 describe('CustomersController', () => {
