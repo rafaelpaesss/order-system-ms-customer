@@ -3,8 +3,7 @@ import { CustomersController } from '../../Presentation/Customers/customers.cont
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { CustomersService } from '../../Application/services/customer.service';
 import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDbHealthIndicator.service';
-import { Customer } from '../../Domain/Interfaces/customer';  // Certifique-se de que esse caminho está correto
-
+import { Customer } from '../../Domain/Interfaces/customer';
 describe('CustomersController', () => {
   let controllerCustomers: CustomersController;
   let customersService: CustomersService;
