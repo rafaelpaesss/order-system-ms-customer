@@ -31,7 +31,7 @@ export class CustomersController {
       throw new ConflictException('Customer with this CPF already exists');
     }
 
-    // Cria o cliente usando o método saveCustomer
+    // Cria o cliente
     const newCustomer: Customer = {
       cpf,
       name,
@@ -39,7 +39,6 @@ export class CustomersController {
       password,
     };
 
-    // Agora utilizando saveCustomer ao invés de createCustomer
     return await this.customersRepository.saveCustomer(newCustomer);
   }
 
@@ -58,5 +57,45 @@ export class CustomersController {
     }
     
     return customer;
+  }
+
+  /**
+   * Atualiza um cliente existente.
+   * 
+   * @param cpf CPF do cliente a ser atualizado.
+   * @param createCustomerDto Dados do cliente a ser atualizado.
+   * @returns O cliente atualizado.
+   */
+  @Put(':cpf')
+  async updateCustomer(
+    @Param('cpf') cpf: string, 
+    @Body() createCustomerDto: CreateCustomerDto
+  ): Promise<Customer> {
+    const customer = await this.customersRepository.getCustomerByCpf(cpf);
+    
+    if (!customer) {
+      throw new NotFoundException('Customer not found');
+    }
+
+    // Atualiza os dados do cliente
+    return this.customersRepository.updateCustomer(cpf, createCustomerDto);
+  }
+
+  /**
+   * Deleta um cliente pelo CPF.
+   * 
+   * @param cpf CPF do cliente a ser deletado.
+   * @returns O cliente deletado.
+   */
+  @Delete(':cpf')
+  async deleteCustomer(@Param('cpf') cpf: string): Promise<Customer> {
+    const customer = await this.customersRepository.getCustomerByCpf(cpf);
+    
+    if (!customer) {
+      throw new NotFoundException('Customer not found');
+    }
+
+    // Deleta o cliente
+    return this.customersRepository.deleteCustomer(cpf);
   }
 }
