@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DynamoDBService } from '../../../Infrastructure/dynamodb.service'; // Ajuste o caminho conforme necessário
-import { Customer } from '../../../Domain/Interfaces/customer'; // Ajuste o caminho conforme necessário
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service'; // Ajuste o caminho conforme necessário
+import { Customer } from '../../Domain/Interfaces/customer'; // Ajuste o caminho conforme necessário
 
 @Injectable()
 export class CustomersService {
