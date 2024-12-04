@@ -24,16 +24,22 @@ describe('CustomersService', () => {
     it('should return a customer when CPF exists', async () => {
       const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com' };
       
-      // Mocking the DynamoDBService response
-      jest.spyOn(dynamoDBService, 'get').mockResolvedValue({ Item: customer });
+      // Mocking the DynamoDBService response with $metadata
+      jest.spyOn(dynamoDBService, 'get').mockResolvedValue({
+        Item: customer,
+        $metadata: {} // Adiciona a propriedade $metadata
+      });
 
       const result = await service.getByCpf('12345678900');
       expect(result).toEqual(customer); // Verifica se o retorno é o esperado
     });
 
     it('should return null when CPF does not exist', async () => {
-      // Mocking the DynamoDBService response
-      jest.spyOn(dynamoDBService, 'get').mockResolvedValue({ Item: null });
+      // Mocking the DynamoDBService response with $metadata
+      jest.spyOn(dynamoDBService, 'get').mockResolvedValue({
+        Item: null,
+        $metadata: {} // Adiciona a propriedade $metadata
+      });
 
       const result = await service.getByCpf('00000000000');
       expect(result).toBeNull(); // Verifica se o resultado é null
@@ -44,8 +50,10 @@ describe('CustomersService', () => {
     it('should save and return a customer', async () => {
       const customer: Customer = { cpf: '12345678900', name: 'Jane Doe', email: 'jane@example.com' };
 
-      // Mocking the DynamoDBService put method
-      jest.spyOn(dynamoDBService, 'put').mockResolvedValue(undefined);
+      // Mocking the DynamoDBService put method with $metadata
+      jest.spyOn(dynamoDBService, 'put').mockResolvedValue({
+        $metadata: {} // Adiciona a propriedade $metadata
+      });
 
       const result = await service.saveCustomer(customer);
       expect(result).toEqual(customer); // Verifica se o retorno é o esperado
@@ -56,8 +64,11 @@ describe('CustomersService', () => {
     it('should update and return the updated customer', async () => {
       const customer: Customer = { cpf: '12345678900', name: 'John Updated', email: 'johnupdated@example.com' };
       
-      // Mocking the DynamoDBService update method
-      jest.spyOn(dynamoDBService, 'update').mockResolvedValue({ Attributes: customer });
+      // Mocking the DynamoDBService update method with $metadata
+      jest.spyOn(dynamoDBService, 'update').mockResolvedValue({
+        Attributes: customer,
+        $metadata: {} // Adiciona a propriedade $metadata
+      });
 
       const result = await service.updateCustomer(customer);
       expect(result).toEqual(customer); // Verifica se o retorno é o esperado
@@ -68,8 +79,11 @@ describe('CustomersService', () => {
     it('should delete and return the deleted customer', async () => {
       const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com' };
 
-      // Mocking the DynamoDBService delete method
-      jest.spyOn(dynamoDBService, 'delete').mockResolvedValue({ Attributes: customer });
+      // Mocking the DynamoDBService delete method with $metadata
+      jest.spyOn(dynamoDBService, 'delete').mockResolvedValue({
+        Attributes: customer,
+        $metadata: {} // Adiciona a propriedade $metadata
+      });
 
       const result = await service.deleteCustomer('12345678900');
       expect(result).toEqual(customer); // Verifica se o retorno é o esperado
