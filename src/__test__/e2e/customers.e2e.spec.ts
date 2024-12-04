@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersController } from '../../Presentation/Customers/customers.controller';
 import { CustomersService } from '../../Application/services/customer.service';
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
+import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
