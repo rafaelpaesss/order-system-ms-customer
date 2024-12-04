@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service'; // Ajuste o caminho conforme necessário
-import { Customer } from '../../Domain/Interfaces/customer'; // Ajuste o caminho conforme necessário
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
+import { Customer } from '../../Domain/Interfaces/customer'; 
+import { ReturnValue } from '@aws-sdk/client-dynamodb'; 
 
 @Injectable()
 export class CustomersService {
@@ -9,7 +10,7 @@ export class CustomersService {
   // Método para buscar um cliente pelo CPF
   async getByCpf(cpf: string): Promise<Customer | null> {
     const params = {
-      TableName: 'customers', // Substitua com o nome da sua tabela DynamoDB
+      TableName: 'customers',
       Key: {
         cpf: { S: cpf },
       },
@@ -27,7 +28,7 @@ export class CustomersService {
   // Método para salvar um novo cliente
   async saveCustomer(customer: Customer): Promise<Customer> {
     const params = {
-      TableName: 'customers', // Substitua com o nome da sua tabela DynamoDB
+      TableName: 'customers',
       Item: {
         cpf: { S: customer.cpf },
         name: { S: customer.name },
@@ -43,7 +44,7 @@ export class CustomersService {
   // Método para atualizar um cliente existente
   async updateCustomer(customer: Customer): Promise<Customer> {
     const params = {
-      TableName: 'customers', // Substitua com o nome da sua tabela DynamoDB
+      TableName: 'customers',
       Key: {
         cpf: { S: customer.cpf },
       },
@@ -56,7 +57,7 @@ export class CustomersService {
         ':name': { S: customer.name },
         ':email': { S: customer.email },
       },
-      ReturnValues: 'ALL_NEW', // Retorna os dados após a atualização
+      ReturnValues: ReturnValue.ALL_NEW, // Agora usando o tipo correto
     };
 
     const result = await this.dynamoDBService.update(params);
@@ -66,7 +67,7 @@ export class CustomersService {
   // Método para deletar um cliente
   async deleteCustomer(cpf: string): Promise<Customer | null> {
     const params = {
-      TableName: 'customers', // Substitua com o nome da sua tabela DynamoDB
+      TableName: 'customers',
       Key: {
         cpf: { S: cpf },
       },
