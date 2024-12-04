@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomersController } from 'src/Customers/customers.controller';
+import { CustomersController } from '../../Presentation/Customers/customers.controller';
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { CustomersService } from '../../Application/services/customer.service';
 import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDBHealthIndicator.service';
-import { Customer } from '../../Interfaces/customer';  // Removido o @
+import { Customer } from '../../Domain/Interfaces/customer';  // Certifique-se de que esse caminho está correto
 
 describe('CustomersController', () => {
   let controllerCustomers: CustomersController;
