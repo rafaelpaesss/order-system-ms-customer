@@ -23,11 +23,11 @@ describe('CustomersService', () => {
   describe('getByCpf', () => {
     it('should return a customer when CPF exists', async () => {
       const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com' };
-      
+
       // Mocking the DynamoDBService response with $metadata
       jest.spyOn(dynamoDBService, 'get').mockResolvedValue({
-        Item: customer,
-        $metadata: {} // Adiciona a propriedade $metadata
+        Item: customer, // Return a customer object if found
+        $metadata: {}
       });
 
       const result = await service.getByCpf('12345678900');
@@ -35,10 +35,10 @@ describe('CustomersService', () => {
     });
 
     it('should return null when CPF does not exist', async () => {
-      // Mocking the DynamoDBService response with $metadata
+      // Mocking the DynamoDBService response with $metadata, but no Item
       jest.spyOn(dynamoDBService, 'get').mockResolvedValue({
-        Item: null,
-        $metadata: {} // Adiciona a propriedade $metadata
+        Item: undefined, // Changed to undefined to match expected type
+        $metadata: {}
       });
 
       const result = await service.getByCpf('00000000000');
@@ -63,7 +63,7 @@ describe('CustomersService', () => {
   describe('updateCustomer', () => {
     it('should update and return the updated customer', async () => {
       const customer: Customer = { cpf: '12345678900', name: 'John Updated', email: 'johnupdated@example.com' };
-      
+
       // Mocking the DynamoDBService update method with $metadata
       jest.spyOn(dynamoDBService, 'update').mockResolvedValue({
         Attributes: customer,
