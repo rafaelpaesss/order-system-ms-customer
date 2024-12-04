@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { CustomersController } from './customers.controller'; 
+import { CustomersController } from './customers.controller';
 import { CustomersService } from '../../Application/services/customer.service';
 import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
-import { DynamoDBCustomersRepository } from '../../Infrastructure/Apis/dynamoDBCustomersRepository';
+import { CustomersAdapter } from '../../Domain/Adapters/customers.adapter'; // Certifique-se de usar o adapter correto
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { ApiService } from '../../Infrastructure/Apis/api.service';
 
@@ -15,7 +15,7 @@ import { ApiService } from '../../Infrastructure/Apis/api.service';
     DynamoDBService,
     {
       provide: CustomersRepository, // Abstração
-      useClass: DynamoDBCustomersRepository, // Implementação concreta
+      useClass: CustomersAdapter, // Implementação concreta
     },
   ],
 })
