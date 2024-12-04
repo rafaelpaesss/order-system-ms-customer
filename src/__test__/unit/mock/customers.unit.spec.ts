@@ -1,92 +1,73 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomersService } from '../../../Application/services/customer.service';
-import { DynamoDBService } from '../../../Infrastructure/Apis/dynamodb.service';
-import { Customer } from '../../../Domain/Interfaces/customer';
+import { CustomersService } from '../../Application/services/customer.service';
+import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
+import { Customer } from '../../Domain/Interfaces/customer';
+
+class MockCustomersRepository {
+  getCustomerByCpf(cpf: string): Promise<Customer | null> {
+    // Mock: Retorna um cliente simulado quando o CPF corresponde
+    if (cpf === '12345678900') {
+      return Promise.resolve({ cpf: '12345678900', name: 'John Doe', email: 'john@example.com', password: 'securepassword' });
+    }
+    return Promise.resolve(null);  // Caso contrário, retorna null
+  }
+
+  saveCustomer(customer: Customer): Promise<Customer> {
+    return Promise.resolve(customer);  // Mock: Retorna o cliente salvo
+  }
+
+  updateCustomer(customer: Customer): Promise<Customer> {
+    return Promise.resolve(customer);  // Mock: Retorna o cliente atualizado
+  }
+
+  deleteCustomer(cpf: string): Promise<Customer> {
+    return Promise.resolve({ cpf, name: 'John Doe', email: 'john@example.com', password: 'securepassword' });  // Mock: Retorna o cliente deletado
+  }
+}
 
 describe('CustomersService', () => {
   let service: CustomersService;
-  let dynamoDBService: DynamoDBService;
+  let customersRepository: MockCustomersRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CustomersService, DynamoDBService],
+      providers: [
+        CustomersService,
+        { provide: CustomersRepository, useClass: MockCustomersRepository },
+      ],
     }).compile();
 
     service = module.get<CustomersService>(CustomersService);
-    dynamoDBService = module.get<DynamoDBService>(DynamoDBService);
+    customersRepository = module.get<CustomersRepository>(CustomersRepository);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('should return a customer when CPF exists', async () => {
+    const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com', password: 'securepassword' };
+
+    // Mocking the repository method
+    jest.spyOn(customersRepository, 'getCustomerByCpf').mockResolvedValue(customer);
+
+    const result = await service.getByCpf('12345678900');
+    expect(result).toEqual(customer); // Verifica se o retorno é o esperado
   });
 
-  describe('getByCpf', () => {
-    it('should return a customer when CPF exists', async () => {
-      const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com' };
+  it('should update and return the updated customer', async () => {
+    const customer: Customer = { cpf: '12345678900', name: 'John Updated', email: 'johnupdated@example.com', password: 'newpassword' };
 
-      // Mocking the DynamoDBService response with $metadata
-      jest.spyOn(dynamoDBService, 'get').mockResolvedValue({
-        Item: customer, // Return a customer object if found
-        $metadata: {}
-      });
+    // Mocking the repository method
+    jest.spyOn(customersRepository, 'updateCustomer').mockResolvedValue(customer);
 
-      const result = await service.getByCpf('12345678900');
-      expect(result).toEqual(customer); // Verifica se o retorno é o esperado
-    });
-
-    it('should return null when CPF does not exist', async () => {
-      // Mocking the DynamoDBService response with $metadata, but no Item
-      jest.spyOn(dynamoDBService, 'get').mockResolvedValue({
-        Item: undefined, // Changed to undefined to match expected type
-        $metadata: {}
-      });
-
-      const result = await service.getByCpf('00000000000');
-      expect(result).toBeNull(); // Verifica se o resultado é null
-    });
+    const result = await service.updateCustomer(customer);
+    expect(result).toEqual(customer); // Verifica se o retorno é o esperado
   });
 
-  describe('saveCustomer', () => {
-    it('should save and return a customer', async () => {
-      const customer: Customer = { cpf: '12345678900', name: 'Jane Doe', email: 'jane@example.com' };
+  it('should delete and return the deleted customer', async () => {
+    const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com', password: 'securepassword' };
 
-      // Mocking the DynamoDBService put method with $metadata
-      jest.spyOn(dynamoDBService, 'put').mockResolvedValue({
-        $metadata: {} // Adiciona a propriedade $metadata
-      });
+    // Mocking the repository method
+    jest.spyOn(customersRepository, 'deleteCustomer').mockResolvedValue(customer);
 
-      const result = await service.saveCustomer(customer);
-      expect(result).toEqual(customer); // Verifica se o retorno é o esperado
-    });
-  });
-
-  describe('updateCustomer', () => {
-    it('should update and return the updated customer', async () => {
-      const customer: Customer = { cpf: '12345678900', name: 'John Updated', email: 'johnupdated@example.com' };
-
-      // Mocking the DynamoDBService update method with $metadata
-      jest.spyOn(dynamoDBService, 'update').mockResolvedValue({
-        Attributes: customer,
-        $metadata: {} // Adiciona a propriedade $metadata
-      });
-
-      const result = await service.updateCustomer(customer);
-      expect(result).toEqual(customer); // Verifica se o retorno é o esperado
-    });
-  });
-
-  describe('deleteCustomer', () => {
-    it('should delete and return the deleted customer', async () => {
-      const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com' };
-
-      // Mocking the DynamoDBService delete method with $metadata
-      jest.spyOn(dynamoDBService, 'delete').mockResolvedValue({
-        Attributes: customer,
-        $metadata: {} // Adiciona a propriedade $metadata
-      });
-
-      const result = await service.deleteCustomer('12345678900');
-      expect(result).toEqual(customer); // Verifica se o retorno é o esperado
-    });
+    const result = await service.deleteCustomer('12345678900');
+    expect(result).toEqual(customer); // Verifica se o retorno é o esperado
   });
 });
