@@ -1,47 +1,78 @@
-import { DynamoDBHealthIndicator } from '../../../Infrastructure/Apis/DynamoDbHealthIndicator.service'; // Caminho correto
-import { CustomersService } from '@Services/customers.service';
-import { DynamoDBService } from '@Apis/dynamoDB.service';
-import { CustomersRepository } from '@Repositories/customers.repository';
-import { Customer } from '@Entities/customer.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import { CustomersService } from '../../../Application/services/customer.service';
+import { DynamoDBService } from '../../../Infrastructure/dynamodb.service';
+import { Customer } from '../../../Domain/Interfaces/customer';
 
 describe('CustomersService', () => {
-  let customersService: CustomersService;
+  let service: CustomersService;
   let dynamoDBService: DynamoDBService;
-  let customersRepository: CustomersRepository;
 
-  beforeEach(() => {
-    dynamoDBService = new DynamoDBService();
-    customersRepository = new CustomersRepository(dynamoDBService);
-    customersService = new CustomersService(customersRepository);
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [CustomersService, DynamoDBService],
+    }).compile();
+
+    service = module.get<CustomersService>(CustomersService);
+    dynamoDBService = module.get<DynamoDBService>(DynamoDBService);
   });
 
-  it('should get customer by id', async () => {
-    const id = 1; // ID como número
-    const customer: Customer = await customersService.getById(id);
-    expect(customer).toBeDefined();
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
-  it('should save a new customer', async () => {
-    const newCustomer: Customer = { id: 1, name: 'John Doe', cpf: '12345678901' };
-    const savedCustomer: Customer = await customersService.save(newCustomer);
-    expect(savedCustomer).toEqual(newCustomer);
+  describe('getByCpf', () => {
+    it('should return a customer when CPF exists', async () => {
+      const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com' };
+      
+      // Mocking the DynamoDBService response
+      jest.spyOn(dynamoDBService, 'get').mockResolvedValue({ Item: customer });
+
+      const result = await service.getByCpf('12345678900');
+      expect(result).toEqual(customer); // Verifica se o retorno é o esperado
+    });
+
+    it('should return null when CPF does not exist', async () => {
+      // Mocking the DynamoDBService response
+      jest.spyOn(dynamoDBService, 'get').mockResolvedValue({ Item: null });
+
+      const result = await service.getByCpf('00000000000');
+      expect(result).toBeNull(); // Verifica se o resultado é null
+    });
   });
 
-  it('should update an existing customer', async () => {
-    const id = 1; // ID como número
-    const updatedCustomer: Customer = { id, name: 'John Updated', cpf: '12345678901' };
-    const updated: Customer = await customersService.update(id, updatedCustomer);
-    expect(updated.name).toEqual('John Updated');
+  describe('saveCustomer', () => {
+    it('should save and return a customer', async () => {
+      const customer: Customer = { cpf: '12345678900', name: 'Jane Doe', email: 'jane@example.com' };
+
+      // Mocking the DynamoDBService put method
+      jest.spyOn(dynamoDBService, 'put').mockResolvedValue(undefined);
+
+      const result = await service.saveCustomer(customer);
+      expect(result).toEqual(customer); // Verifica se o retorno é o esperado
+    });
   });
 
-  it('should delete a customer', async () => {
-    const id = 1; // ID como número
-    await expect(customersService.delete(id)).resolves.toBeUndefined();
+  describe('updateCustomer', () => {
+    it('should update and return the updated customer', async () => {
+      const customer: Customer = { cpf: '12345678900', name: 'John Updated', email: 'johnupdated@example.com' };
+      
+      // Mocking the DynamoDBService update method
+      jest.spyOn(dynamoDBService, 'update').mockResolvedValue({ Attributes: customer });
+
+      const result = await service.updateCustomer(customer);
+      expect(result).toEqual(customer); // Verifica se o retorno é o esperado
+    });
   });
 
-  it('should get customer by CPF', async () => {
-    const cpf = '12345678901';
-    const customer = await customersService.getByCpf(cpf);
-    expect(customer).toBeDefined();
+  describe('deleteCustomer', () => {
+    it('should delete and return the deleted customer', async () => {
+      const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john@example.com' };
+
+      // Mocking the DynamoDBService delete method
+      jest.spyOn(dynamoDBService, 'delete').mockResolvedValue({ Attributes: customer });
+
+      const result = await service.deleteCustomer('12345678900');
+      expect(result).toEqual(customer); // Verifica se o retorno é o esperado
+    });
   });
 });
