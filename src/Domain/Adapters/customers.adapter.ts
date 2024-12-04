@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DynamoDBService } from '../../Infrastructure/Apis/dynamoDB.service';
-import { Customers } from '../Interfaces/customers';
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
+import { Customers } from '../Interfaces/customer';
 import { CustomersRepository } from '../Repositories/customersRepository';
 
 @Injectable()
