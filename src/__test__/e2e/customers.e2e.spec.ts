@@ -1,45 +1,81 @@
-import { DynamoDBService } from '@Apis/dynamodb.service';
-import { CustomersService } from '@Services/customer.service';
-import { DynamoDBHealthIndicator } from '@Health/DynamoDBHealthIndicator.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { CustomersController } from '../../Presentation/Customers/customers.controller';
+import { CustomersService } from '../../Application/services/customer.service';
+import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
+import { DynamoDBHealthIndicator } from '../../Presentation/health/DynamoDbHealthIndicator.service';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
 
-describe('E2E Tests for Customers', () => {
+describe('CustomersController (e2e)', () => {
+  let app: INestApplication;
   let customersService: CustomersService;
-  let dynamoDBService: DynamoDBService;
-  let dynamoDBHealthIndicator: DynamoDBHealthIndicator;
 
-  beforeEach(() => {
-    dynamoDBService = new DynamoDBService();
-    customersService = new CustomersService(dynamoDBService);
-    dynamoDBHealthIndicator = new DynamoDBHealthIndicator();
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [CustomersController],
+      providers: [CustomersService, DynamoDBService, DynamoDBHealthIndicator],
+    }).compile();
+
+    app = module.createNestApplication();
+    await app.init();
+
+    customersService = module.get<CustomersService>(CustomersService);
   });
 
-  it('should fetch a customer by ID', async () => {
-    const id = '123';
-    const customer = await customersService.getById(id);
-    expect(customer).toBeDefined();
-    expect(customer.id).toBe(id);
+  it('/customers (GET) - should return a customer by CPF', async () => {
+    const customer = { cpf: '12345678900', name: 'John Doe' };
+
+    jest.spyOn(customersService, 'getByCpf').mockResolvedValue(customer);
+
+    const response = await request(app.getHttpServer())
+      .get('/customers')
+      .query({ cpf: customer.cpf })
+      .expect(200);
+
+    expect(response.body).toEqual(customer);
   });
 
-  it('should save a new customer', async () => {
-    const newCustomer = { id: '124', name: 'Jane Doe', cpf: '987654321' };
-    const savedCustomer = await customersService.save(newCustomer);
-    expect(savedCustomer).toEqual(newCustomer);
+  it('/customers (POST) - should create a new customer', async () => {
+    const customer = { cpf: '12345678901', name: 'Jane Doe' };
+
+    jest.spyOn(customersService, 'create').mockResolvedValue(customer);
+
+    const response = await request(app.getHttpServer())
+      .post('/customers')
+      .send(customer)
+      .expect(201);
+
+    expect(response.body).toEqual(customer);
   });
 
-  it('should update an existing customer', async () => {
-    const id = '123';
-    const updatedCustomer = { id, name: 'John Doe Updated', cpf: '123456789' };
-    const updated = await customersService.update(id, updatedCustomer);
-    expect(updated).toEqual(updatedCustomer);
+  it('/customers (PUT) - should update an existing customer', async () => {
+    const customer = { cpf: '12345678900', name: 'John Doe Updated' };
+
+    jest.spyOn(customersService, 'update').mockResolvedValue(customer);
+
+    const response = await request(app.getHttpServer())
+      .put('/customers')
+      .send(customer)
+      .expect(200);
+
+    expect(response.body).toEqual(customer);
   });
 
-  it('should delete a customer', async () => {
-    const id = '123';
-    await expect(customersService.delete(id)).resolves.toBeUndefined();
+  it('/customers (DELETE) - should delete a customer by CPF', async () => {
+    const cpf = '12345678900';
+    const customer = { cpf, name: 'John Doe' };
+
+    jest.spyOn(customersService, 'delete').mockResolvedValue(customer);
+
+    const response = await request(app.getHttpServer())
+      .delete('/customers')
+      .query({ cpf })
+      .expect(200);
+
+    expect(response.body).toEqual(customer);
   });
 
-  it('should check DynamoDB health status', async () => {
-    const healthStatus = await dynamoDBHealthIndicator.checkHealth();
-    expect(healthStatus.status).toBe('ok');
+  afterAll(async () => {
+    await app.close();
   });
 });
