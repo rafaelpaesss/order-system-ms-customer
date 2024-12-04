@@ -1,83 +1,57 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CustomersController } from '../../Presentation/Customers/customers.controller';
-import { CustomersService } from '../../Application/services/customer.service';
-import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
-import { CustomersRepository } from '../../Domain/Repositories/customersRepository';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-
-// Mock do CustomersRepository para os testes e2e
-class MockCustomersRepository {
-  async getCustomerByCpf(cpf: string) {
-    return { cpf, name: 'John Doe', email: 'john.doe@example.com' };  // Mock de cliente
-  }
-
-  async saveCustomer(customer: any) {
-    return customer;  // Retorna o próprio cliente
-  }
-
-  async updateCustomer(customer: any) {
-    return customer;  // Retorna o cliente atualizado
-  }
-
-  async deleteCustomer(cpf: string) {
-    return { cpf, name: 'John Doe', email: 'john.doe@example.com' };  // Retorna o cliente deletado
-  }
-}
+import * as request from 'supertest';
+import { Test } from '@nestjs/testing';
+import { AppModule } from '../src/app.module';  // Ajuste o caminho conforme seu projeto
+import { Customer } from '../src/Domain/Interfaces/customer';
 
 describe('CustomersController (e2e)', () => {
-  let app: INestApplication;
-  let customersService: CustomersService;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [CustomersController],
-      providers: [
-        CustomersService,
-        DynamoDBService,
-        { provide: CustomersRepository, useClass: MockCustomersRepository }, // Mock do repositório
-      ],
+  let app;
+  
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule],
     }).compile();
 
-    app = module.createNestApplication();
+    app = moduleRef.createNestApplication();
     await app.init();
-
-    customersService = module.get<CustomersService>(CustomersService);
   });
 
   it('/customers (GET) - should return a customer by CPF', async () => {
-    const customer = { cpf: '12345678900', name: 'John Doe', email: 'john.doe@example.com' };
+    const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john.doe@example.com', password: 'password123' };
 
-    jest.spyOn(customersService, 'getByCpf').mockResolvedValue(customer);
+    // Mocka o serviço getCustomerByCpf para retornar o cliente
+    jest.spyOn(customersService, 'getCustomerByCpf').mockResolvedValue(customer);
 
     const response = await request(app.getHttpServer())
-      .get('/customers')
-      .query({ cpf: customer.cpf })
+      .get(`/customers/${customer.cpf}`) // Alterado para usar o CPF na URL
       .expect(200);
 
     expect(response.body).toEqual(customer);
   });
 
   it('/customers (POST) - should create a new customer', async () => {
-    const customer = { cpf: '12345678901', name: 'Jane Doe', email: 'jane.doe@example.com' };
+    const customer: Customer = { cpf: '12345678901', name: 'Jane Doe', email: 'jane.doe@example.com', password: 'password123' };
 
+    // Mocka os serviços getCustomerByCpf e saveCustomer
+    jest.spyOn(customersService, 'getCustomerByCpf').mockResolvedValue(null); // Simula que o cliente não existe
     jest.spyOn(customersService, 'saveCustomer').mockResolvedValue(customer);
 
     const response = await request(app.getHttpServer())
       .post('/customers')
       .send(customer)
-      .expect(201);
+      .expect(201);  // Espera status 201 de criação
 
     expect(response.body).toEqual(customer);
   });
 
   it('/customers (PUT) - should update an existing customer', async () => {
-    const customer = { cpf: '12345678900', name: 'John Doe Updated', email: 'john.doe.updated@example.com' };
+    const customer: Customer = { cpf: '12345678900', name: 'John Doe Updated', email: 'john.doe.updated@example.com', password: 'newpassword123' };
 
+    // Mocka os serviços
+    jest.spyOn(customersService, 'getCustomerByCpf').mockResolvedValue(customer); // Simula que o cliente existe
     jest.spyOn(customersService, 'updateCustomer').mockResolvedValue(customer);
 
     const response = await request(app.getHttpServer())
-      .put('/customers')
+      .put(`/customers/${customer.cpf}`)  // Alterado para usar o CPF na URL
       .send(customer)
       .expect(200);
 
@@ -86,13 +60,14 @@ describe('CustomersController (e2e)', () => {
 
   it('/customers (DELETE) - should delete a customer by CPF', async () => {
     const cpf = '12345678900';
-    const customer = { cpf, name: 'John Doe', email: 'john.doe@example.com' };
+    const customer: Customer = { cpf, name: 'John Doe', email: 'john.doe@example.com', password: 'password123' };
 
+    // Mocka os serviços
+    jest.spyOn(customersService, 'getCustomerByCpf').mockResolvedValue(customer); // Simula que o cliente existe
     jest.spyOn(customersService, 'deleteCustomer').mockResolvedValue(customer);
 
     const response = await request(app.getHttpServer())
-      .delete('/customers')
-      .query({ cpf })
+      .delete(`/customers/${cpf}`)  // Alterado para usar o CPF na URL
       .expect(200);
 
     expect(response.body).toEqual(customer);
