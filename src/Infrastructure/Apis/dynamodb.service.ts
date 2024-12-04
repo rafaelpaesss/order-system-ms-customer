@@ -4,8 +4,8 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCo
 
 @Injectable()
 export class DynamoDBService implements OnModuleInit, OnModuleDestroy {
-  private client: DynamoDBClient;
-  private docClient: DynamoDBDocumentClient;
+  private client!: DynamoDBClient; // Usando o operador '!' para indicar que será inicializado
+  private docClient!: DynamoDBDocumentClient; // Usando o operador '!' para indicar que será inicializado
 
   async onModuleInit() {
     this.client = new DynamoDBClient({});
