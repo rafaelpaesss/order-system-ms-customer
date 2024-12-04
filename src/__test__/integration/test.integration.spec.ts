@@ -3,7 +3,7 @@ import { CustomersController } from '../../Presentation/Customers/customers.cont
 import { DynamoDBService } from '../../Infrastructure/Apis/dynamodb.service';
 import { CustomersService } from '../../Application/services/customer.service';
 import { DynamoDBHealthIndicator } from '../../Presentation/Health/DynamoDbHealthIndicator.service';
-import { Customer } from '../../Domain/Interfaces/customer';
+import { Customer } from '../../Domain/Interfaces/customer';  // Certifique-se de que esse caminho está correto
 
 describe('CustomersController', () => {
   let controllerCustomers: CustomersController;
@@ -25,7 +25,7 @@ describe('CustomersController', () => {
     const customer: Customer = { cpf: '12345678900', name: 'John Doe', email: 'john.doe@example.com' }; // Simulando um CPF válido
     jest.spyOn(customersService, 'getByCpf').mockResolvedValue(customer); // mock do método getByCpf
 
-    const result = await controllerCustomers.getCustomerByCpf(customer.cpf);
+    const result = await controllerCustomers.getCustomer(customer.cpf); // Alterado para getCustomer
     expect(result).toEqual(customer); // Verifica se o retorno é o esperado
   });
 
